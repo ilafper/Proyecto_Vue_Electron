@@ -1,6 +1,6 @@
-<template >
-  <div class="home-container"  v-if="user && !loading">
-    <h2>Usuario {{ user.rol }}</h2>
+<template>
+  <div class="home-container">
+    <h2>Usuario normal</h2>
     <h2>Bienvenido al sistema</h2>
     
     <!-- Mostrar mensaje de carga mientras se verifica -->
@@ -10,7 +10,9 @@
     
     <!-- Mostrar datos del usuario cuando estén disponibles -->
     <div class="datosUser" v-if="user && !loading">
-      <p>Nombre: {{ user.nombre }}</p>
+      <p>Nombre: {{ user.nombre }} {{ user.apellidos }}</p>
+      <p>Email: {{ user.correo }}</p>
+      <p>Rol: {{ user.rol }}</p>
     </div>
     
     <!-- Mostrar mensaje si no hay usuario -->
