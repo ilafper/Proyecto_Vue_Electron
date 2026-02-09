@@ -34,6 +34,8 @@
                     {{ loading ? 'Cargando...' : 'Iniciar Sesión' }}
                 </button>
             </form>
+        
+            <h3>¿No tienes cuenta? <RouterLink to="/register">Registrate</RouterLink></h3>
         </div>
     </div>
 </template>
@@ -47,7 +49,7 @@ export default {
             this.error = ''
             this.loading = true
             
-            console.log('📤 Datos:', {
+            console.log('Datos:', {
                 email: this.email,
                 password: this.password
             })
@@ -64,24 +66,24 @@ export default {
                     this.password
                 )
                 
-                console.log('📥 Resultado:', resultado)
+                console.log('Resultado:', resultado)
 
                 if (resultado.success) {
-                    console.log('✅ Login exitoso')
+                    console.log('Login exitoso')
                     
                     // Guardar usuario en localStorage
                     localStorage.setItem('user', JSON.stringify(resultado.user))
-                    console.log('💾 Usuario guardado en localStorage')
+                    console.log('Usuario guardado en localStorage')
                     
                     // Redirigir según rol
                     const rol = resultado.user.rol.toLowerCase()
-                    console.log('🎭 Rol del usuario:', rol)
+                    console.log('Rol del usuario:', rol)
                     
                     if (rol === 'user') {
-                        console.log('🔄 Redirigiendo a /home')
+                        console.log('Redirigiendo a /home')
                         this.$router.push('/home')
                     } else if (rol === 'admin') {
-                        console.log('🔄 Redirigiendo a /admin')
+                        console.log('Redirigiendo a /admin')
                         this.$router.push('/admin')
                     } else {
                         this.error = "Rol no reconocido: " + rol
@@ -92,7 +94,7 @@ export default {
                 }
 
             } catch (err) {
-                console.error('❌ Error:', err)
+                console.error('Error:', err)
                 this.error = 'Error de conexión con el servidor'
             } finally {
                 this.loading = false
@@ -102,8 +104,8 @@ export default {
     
     // Para debugging
     mounted() {
-        console.log('🚀 LoginView montado')
-        console.log('🔍 Router disponible?', !!this.$router)
+        console.log('LoginView montado')
+        console.log('Router disponible?', !!this.$router)
     }
 }
 </script>

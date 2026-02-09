@@ -33,7 +33,7 @@ function createWindow() {
 
 // HANDLER PARA LOGIN
 ipcMain.handle('api-login', async (event, { email, password }) => {
-  console.log('📨 Recibiendo login para:', email);
+  console.log('Recibiendo login para:', email);
   
   try {
     // Enviar solicitud a la api
@@ -49,8 +49,9 @@ ipcMain.handle('api-login', async (event, { email, password }) => {
     });
     
     const data = await response.json();
+    console.log("Datos datos"+data);
     
-    console.log('📥 Respuesta de API:', {
+    console.log('Respuesta de API:', {
       success: data.success,
       user: data.user ? 'Usuario recibido' : 'No user'
     });
@@ -58,7 +59,7 @@ ipcMain.handle('api-login', async (event, { email, password }) => {
     return data;
     
   } catch (error) {
-    console.error('❌ Error conectando a la API:', error);
+    console.error('Error conectando a la API:', error);
     return {
       success: false,
       message: 'No se pudo conectar al servidor'
@@ -73,13 +74,13 @@ ipcMain.handle('api-get-usuarios', async () => {
     const data = await response.json();
     return { success: true, usuarios: data };
   } catch (error) {
-    console.error('❌ Error obteniendo usuarios:', error);
+    console.error('Error obteniendo usuarios:', error);
     return { success: false, message: 'Error obteniendo usuarios' };
   }
 });
 
 // HANDLER PARA CREAR USUARIO
-ipcMain.handle('api-crear-usuario', async (event, usuarioData) => {
+ipcMain.handle('api-registro', async (event, usuarioData) => {
   try {
     const response = await fetch('http://localhost:3000/api/crearusuario', {
       method: 'POST',
@@ -93,10 +94,19 @@ ipcMain.handle('api-crear-usuario', async (event, usuarioData) => {
     return data;
     
   } catch (error) {
-    console.error('❌ Error creando usuario:', error);
+    console.error('Error creando usuario:', error);
     return { error: 'Error creando usuario' };
   }
 });
+
+
+
+
+
+
+
+
+
 
 
 // INICIAR LA APLICACIÓN
@@ -104,9 +114,9 @@ ipcMain.handle('api-crear-usuario', async (event, usuarioData) => {
 
 app.whenReady().then(() => {
   createWindow();
-  console.log('✅ Electron iniciado correctamente');
-  console.log('🔗 Preload:', path.join(__dirname, 'preload.js'));
-  console.log('🔌 Handlers cargados: api-login, api-get-usuarios, api-crear-usuario');
+  console.log('Electron iniciado correctamente');
+  console.log('Preload:', path.join(__dirname, 'preload.js'));
+  console.log('Handlers cargados: api-login, api-get-usuarios, api-crear-usuario');
 });
 
 app.on('window-all-closed', () => {
@@ -123,7 +133,7 @@ app.on('activate', () => {
 
 // Manejo de errores
 process.on('uncaughtException', (error) => {
-  console.error('🔥 Error no capturado:', error);
+  console.error('Error no capturado:', error);
 });
 
-console.log('🚀 Electron main.js cargado - Esperando app.whenReady()');
+console.log('Electron main.js cargado - Esperando app.whenReady()');

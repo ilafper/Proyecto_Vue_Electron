@@ -4,7 +4,6 @@ import App from './App.vue';
 import router from './router'
 
 
-
 // 2. Crear aplicación Vue
 const app = createApp(App);
 app.use(router);
