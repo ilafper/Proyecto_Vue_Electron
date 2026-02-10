@@ -79,6 +79,21 @@ ipcMain.handle('api-get-usuarios', async () => {
   }
 });
 
+
+
+ipcMain.handle('api-get-eventos', async () => {
+  try {
+    const response = await fetch('http://localhost:3000/api/eventos');
+    const lista_eventos = await response.json();
+    return { success: true, eventos: lista_eventos };
+  } catch (error) {
+    console.error('Error obteniendo usuarios:', error);
+    return { success: false, message: 'Error obteniendo eventos' };
+  }
+});
+
+
+
 // HANDLER PARA CREAR USUARIO
 ipcMain.handle('api-registro', async (event, usuarioData) => {
   try {

@@ -1,5 +1,10 @@
 <template >
-  <div class="home-container"  v-if="user && !loading">
+  <header>
+      <h2><RouterLink class="link" to="/admin">Home</RouterLink></H2>
+      <h2><RouterLink class="link" to="/eventosAdmin">Eventos</RouterLink></H2>
+    </header>
+  <div class="home-container"  v-if="user">
+
     <h2>Usuario {{ user.rol }}</h2>
     <h2>Bienvenido al sistema</h2>
     
@@ -78,6 +83,20 @@ export default {
 </script>
 
 <style scoped>
+
+header{
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  border: 2px solid grey;
+  padding: 20px;
+}
+header .link{
+  text-decoration: none;
+  color: rgb(170, 166, 166);
+  font-weight: bold;
+  font-size: 20px;
+}
 .home-container {
   padding: 40px;
   text-align: center;

@@ -1,5 +1,5 @@
 <template>
-  <div class="eventos-container">
+  <div class="usuarios-container">
     <!-- Header con navegación -->
     <header class="admin-header">
       <div class="header-content">
@@ -17,7 +17,7 @@
           </RouterLink>
           <RouterLink class="nav-link" to="/usersAdmin">
             <Icon icon="mdi:users" width="20" />
-            <span>Usuarios</span>
+            <span>Home</span>
           </RouterLink>
         </nav>
       </div>
@@ -25,20 +25,6 @@
 
     <!-- Contenido principal -->
     <main class="main-content">
-      <div class="content-header">
-        <h2 class="page-title">
-          <Icon icon="mdi:calendar-text" width="28" />
-          Gestión de Eventos
-        </h2>
-        <div class="header-actions">
-          <button class="btn btn-primary">
-            <Icon icon="mdi:plus" width="18" />
-            Nuevo Evento
-          </button>
-        </div>
-      </div>
-
-      <!-- Tabla de eventos -->
       <div class="card table-container">
         <div class="loading-state" v-if="loading">
           <div class="spinner"></div>
@@ -69,7 +55,7 @@
             <thead>
               <tr>
                 <th class="text-left">Nombre</th>
-                <th class="text-left">Descripción</th>
+                <th class="text-left">apellidos</th>
                 <th class="text-center">Plazas Total</th>
                 <th class="text-center">Disponibles</th>
                 <th class="text-center">Inicio</th>
@@ -78,9 +64,9 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="cada_evento in eventos">
+              <tr v-for="cada_usuario in usuarios">
                 <td class="event-name">
-                  <strong>{{ cada_evento.nombreEvento }}</strong>
+                  <strong>{{ cada_evento.nombre }}</strong>
                 </td>
                 <td class="event-description">
                   {{ truncateText(cada_evento.descripcionEvento, 50) }}
@@ -122,22 +108,6 @@
               </tr>
             </tbody>
           </table>
-        </div>
-      </div>
-
-      <!-- Footer de la tabla -->
-      <div class="table-footer" v-if="eventos && eventos.length > 0">
-        <div class="footer-info">
-          <p>Mostrando {{ eventos.length }} eventos</p>
-        </div>
-        <div class="pagination" v-if="totalPages > 1">
-          <button class="btn-pagination" :disabled="currentPage === 1">
-            <Icon icon="mdi:chevron-left" width="18" />
-          </button>
-          <span class="page-info">Página {{ currentPage }} de {{ totalPages }}</span>
-          <button class="btn-pagination" :disabled="currentPage === totalPages">
-            <Icon icon="mdi:chevron-right" width="18" />
-          </button>
         </div>
       </div>
     </main>
@@ -188,15 +158,15 @@ export default {
       }, 100)
     },
 
-    async cargareventos() {
+    async cargarusuarios() {
       
       try {
-        const response = await window.electronAPI.getEventos()
+        const response = await window.electronAPI.getUsuarios()
         console.log("eventos evento sisis"+ response);
         
         if (response.success) {
-          this.eventos = response.eventos.eventosFormateados
-          console.log(this.eventos);
+          this.usuarios = response.usuarioss
+          console.log(this.usuarios);
           
         } else {
           this.error = response.message
@@ -207,24 +177,6 @@ export default {
       } finally {
         this.loading = false
       }
-    },
-
-    editarEvento(codigo) {
-      console.log('Editar evento:', codigo)
-      
-    },
-
-    eliminarEvento(codigo) {
-      if (confirm('¿Estás seguro de eliminar este evento?')) {
-        console.log('Eliminar evento:', codigo)
-      }
-    },
-
-    truncateText(text, maxLength) {
-      if (!text) return ''
-      return text.length > maxLength 
-        ? text.substring(0, maxLength) + '...' 
-        : text
     }
   }
 }
@@ -337,274 +289,5 @@ export default {
   transform: translateY(-2px);
 }
 
-.btn-secondary {
-  background-color: white;
-  color: var(--primary-color);
-  border: 2px solid var(--primary-color);
-}
 
-.btn-secondary:hover {
-  background-color: #f8f9fa;
-}
-
-.btn-icon {
-  background: none;
-  border: none;
-  padding: 0.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-edit {
-  color: var(--primary-color);
-}
-
-.btn-edit:hover {
-  background-color: rgba(67, 97, 238, 0.1);
-}
-
-.btn-delete {
-  color: var(--danger-color);
-}
-
-.btn-delete:hover {
-  background-color: rgba(247, 37, 133, 0.1);
-}
-
-.btn-view {
-  color: var(--gray-color);
-}
-
-.btn-view:hover {
-  background-color: rgba(108, 117, 125, 0.1);
-}
-
-/* Card and table container */
-.card {
-  background: white;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
-  padding: 2rem;
-}
-
-.table-responsive {
-  overflow-x: auto;
-}
-
-/* Table styles */
-.events-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.events-table thead {
-  background-color: #f8f9fa;
-}
-
-.events-table th {
-  padding: 1rem;
-  color: var(--dark-color);
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 0.875rem;
-  letter-spacing: 0.05em;
-  border-bottom: 2px solid var(--border-color);
-}
-
-.events-table td {
-  padding: 1rem;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.events-table tbody tr {
-  transition: background-color 0.3s ease;
-}
-
-.events-table tbody tr:hover {
-  background-color: #f8f9fa;
-}
-
-/* Badges */
-.badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.badge-success {
-  background-color: rgba(76, 201, 240, 0.1);
-  color: var(--success-color);
-}
-
-.badge-warning {
-  background-color: rgba(248, 150, 30, 0.1);
-  color: var(--warning-color);
-}
-
-.badge-danger {
-  background-color: rgba(247, 37, 133, 0.1);
-  color: var(--danger-color);
-}
-
-/* States */
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem;
-  color: var(--gray-color);
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid var(--primary-color);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.error-state {
-  text-align: center;
-  padding: 3rem;
-  color: var(--danger-color);
-}
-
-.error-icon {
-  margin-bottom: 1rem;
-}
-
-.error-message {
-  color: var(--gray-color);
-  margin: 1rem 0;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 4rem;
-  color: var(--gray-color);
-}
-
-.empty-state h3 {
-  margin: 1rem 0 0.5rem;
-  color: var(--dark-color);
-}
-
-/* Footer */
-.table-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 2rem;
-  padding: 1rem;
-  background: white;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
-}
-
-.footer-info {
-  color: var(--gray-color);
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.btn-pagination {
-  background: none;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-pagination:hover:not(:disabled) {
-  background-color: #f8f9fa;
-  border-color: var(--primary-color);
-}
-
-.btn-pagination:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.page-info {
-  color: var(--gray-color);
-  font-size: 0.875rem;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .content-header {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
-  
-  .header-actions {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .events-table th,
-  .events-table td {
-    padding: 0.75rem 0.5rem;
-    font-size: 0.875rem;
-  }
-  
-  .action-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .table-footer {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
-}
-
-/* Text utilities */
-.text-left { text-align: left; }
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-
-/* Date cells */
-.date-cell {
-  font-family: 'Courier New', monospace;
-  font-size: 0.875rem;
-  color: var(--gray-color);
-}
-
-/* Event name */
-.event-name {
-  font-weight: 600;
-  color: var(--dark-color);
-}
-
-/* Event description */
-.event-description {
-  max-width: 300px;
-  line-height: 1.5;
-  color: var(--gray-color);
-}
 </style>
