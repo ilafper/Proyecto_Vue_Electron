@@ -18,6 +18,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   getEventos:()=>{
     return ipcRenderer.invoke('api-get-eventos');
-  }
+  },
+  // const {
+  //     nombreEvento,
+  //     descripcionEvento,
+  //     plazasTotales,
+  //     fechaInicio,
+  //     fechaFin,
+  //   } = req.body;
+
+
+  crearEvento: (nombreEvento,descripcionEvento,plazasTotales, fechaInicio, fechaFin) => {
+    return ipcRenderer.invoke('api-crear-evento', { nombreEvento,descripcionEvento,plazasTotales, fechaInicio,fechaFin});
+  },
   
 });

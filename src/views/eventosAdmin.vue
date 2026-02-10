@@ -5,7 +5,7 @@
       <div class="header-content">
         <h1 class="app-title">Panel de Administración</h1>
         <nav class="nav-links">
-          
+
           <RouterLink class="nav-link" to="/admin">
             <Icon icon="mdi:home" width="20" />
             <span>Home</span>
@@ -31,7 +31,7 @@
           Gestión de Eventos
         </h2>
         <div class="header-actions">
-          <button class="btn btn-primary">
+          <button @click="abrirModal" class="btn btn-primary">
             <Icon icon="mdi:plus" width="18" />
             Nuevo Evento
           </button>
@@ -58,7 +58,7 @@
           <Icon icon="mdi:calendar-remove" width="48" />
           <h3>No hay eventos registrados</h3>
           <p>Comienza creando tu primer evento</p>
-          <button class="btn btn-primary">
+          <button @click="abrirModal" class="btn btn-primary">
             <Icon icon="mdi:plus" width="18" />
             Crear Evento
           </button>
@@ -83,38 +83,30 @@
                   <strong>{{ cada_evento.nombreEvento }}</strong>
                 </td>
                 <td class="event-description">
-                  {{ truncateText(cada_evento.descripcionEvento, 50) }}
+                  {{ truncateText(cada_evento.descripcionEvento, 40) }}
                 </td>
                 <td class="text-center">
                   <span class="badge">{{ cada_evento.plazasTotales }}</span>
                 </td>
                 <td class="text-center">
-                  <span 
-                    :class="['badge', cada_evento.PlazasDisponibles]"
-                  >
+                  <span :class="['badge', cada_evento.PlazasDisponibles]">
                     {{ cada_evento.PlazasDisponibles }}
                   </span>
                 </td>
                 <td class="text-center date-cell">
-                  {{ cada_evento.fechaInicio}}
+                  {{ cada_evento.fechaInicio }}
                 </td>
                 <td class="text-center date-cell">
                   {{ cada_evento.fechaFin }}
                 </td>
                 <td class="action-cell">
                   <div class="action-buttons">
-                    <button 
-                      class="btn-icon btn-edit" 
-                      title="Editar evento"
-                      @click="editarEvento(cada_evento.code_Evento)"
-                    >
+                    <button class="btn-icon btn-edit" title="Editar evento"
+                      @click="editarEvento(cada_evento.code_Evento)">
                       <Icon icon="mdi:pencil" width="18" />
                     </button>
-                    <button 
-                      class="btn-icon btn-delete" 
-                      title="Eliminar evento"
-                      @click="eliminarEvento(cada_evento.code_Evento)"
-                    >
+                    <button class="btn-icon btn-delete" title="Eliminar evento"
+                      @click="eliminarEvento(cada_evento.code_Evento)">
                       <Icon icon="mdi:trash-can-outline" width="18" />
                     </button>
                   </div>
@@ -140,38 +132,135 @@
           </button>
         </div>
       </div>
+
     </main>
+    <footer>
+      asd
+    </footer>
+    <div v-if="modalVisible" class="modal-overlay" @click="cerrarModal">
+      <div class="modal-content" @click.stop>
+        <!-- Cabecera -->
+        <div class="modal-header">
+          <h3>Creacion eventos</h3>
+          <button class="close-btn" @click="cerrarModal">×</button>
+        </div>
+
+        <form @submit.prevent="crearevento" class="eventos-form">
+          <div class="input-group">
+            <label>Nombre Evento</label>
+            <input type="text" v-model="nombreEvento" placeholder="Firma de Autógrafos" required />
+          </div>
+
+          <div class="input-group">
+            <label>Descripcion</label>
+            <input type="textarea" v-model="descripcionEvento" placeholder="Encuentro con artistas locales..." />
+          </div>
+          <div class="input-group">
+            <label>Plazas Totales</label>
+            <input type="number" v-model="plazasTotales" required />
+          </div>
+          <div class="input-group">
+            <label>fechaInicio</label>
+            <input type="date" v-model="fechaInicio" required />
+          </div>
+
+          <div class="input-group">
+            <label>fecha Fin</label>
+            <input type="date" v-model="fechaFin" required />
+          </div>
+
+          <div v-if="error" class="error">
+            {{ error }}
+          </div>
+
+          <button type="submit" :disabled="loading" class="crearEvento">
+            {{ loading ? 'Cargando...' : 'Crear evento' }}
+          </button>
+        </form>
+      </div>
+    </div>
   </div>
+
+
 </template>
 
 <script>
 import { Icon } from '@iconify/vue'
 
+
 export default {
   name: 'EventosAdmin',
-  
+
   components: {
     Icon
   },
-  
+
+
   data() {
     return {
       user: null,
-      loading: true,
-      eventos: [],
       error: null,
       currentPage: 1,
-      totalPages: 1,
-      itemsPerPage: 10
+      eventos: [],
+      modalVisible: false,
     }
   },
 
   mounted() {
     this.cargarDatos()
     this.cargareventos()
+    this.crearevento()
   },
 
   methods: {
+    abrirModal() {
+      console.log("abriendo modal sisisi");
+
+      this.modalVisible = true
+    },
+
+    cerrarModal() {
+      this.modalVisible = false
+      console.log("cerrando cerrando");
+
+    },
+    async crearevento() {
+
+      console.log('Datos nuevo evento:', {
+        nombreEvento: this.nombreEvento,
+        descripcionEvento: this.descripcionEvento,
+        plazasTotales: this.plazasTotales,
+        fechaInicio: this.fechaInicio,
+        fechaFin: this.fechaFin
+      })
+
+      try {
+        // Verificar Electron API
+        if (!window.electronAPI) {
+          throw new Error('Electron no está disponible')
+        }
+
+        // Llamar a Electron
+        const resultado = await window.electronAPI.crearEvento(
+          this.nombreEvento,
+          this.descripcionEvento,
+          this.plazasTotales,
+          this.fechaInicio,
+          this.fechaFin,
+        )
+
+        console.log('Resultado:', resultado)
+
+
+      } catch (err) {
+        console.error('Error:', err)
+        this.error = 'Error de conexión con el servidor'
+      } finally {
+        this.loading = false
+      }
+    },
+
+
     cargarDatos() {
       setTimeout(() => {
         const usuarioDatos = localStorage.getItem('user')
@@ -189,15 +278,15 @@ export default {
     },
 
     async cargareventos() {
-      
+
       try {
         const response = await window.electronAPI.getEventos()
-        console.log("eventos evento sisis"+ response);
-        
+        //console.log("eventos evento sisis", response);
+
         if (response.success) {
           this.eventos = response.eventos.eventosFormateados
           console.log(this.eventos);
-          
+
         } else {
           this.error = response.message
         }
@@ -211,7 +300,7 @@ export default {
 
     editarEvento(codigo) {
       console.log('Editar evento:', codigo)
-      
+
     },
 
     eliminarEvento(codigo) {
@@ -222,8 +311,8 @@ export default {
 
     truncateText(text, maxLength) {
       if (!text) return ''
-      return text.length > maxLength 
-        ? text.substring(0, maxLength) + '...' 
+      return text.length > maxLength
+        ? text.substring(0, maxLength) + '...'
         : text
     }
   }
@@ -231,19 +320,93 @@ export default {
 </script>
 
 <style scoped>
+.crearEvento {
+  cursor: pointer;
+  margin-top: 10px;
+  width: 100%;
+  border: none;
+  padding: 10px;
+  color: white;
+  background-color: rgba(117, 50, 117, 0.658);
+}
+
+.close-btn {
+  border: none;
+  background: none;
+  position: relative;
+  left: 430px;
+  top: -40px;
+  font-size: 40px;
+  cursor: pointer;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #555;
+}
+
+.input-group input {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.input-group input:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  padding: 30px;
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+body {
+  height: auto;
+}
 
 .eventos-container {
-  height: auto;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  height: 100%;
+  background: rgb(148, 148, 182);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 
 .admin-header {
   background: white;
-  box-shadow: var(--shadow);
   padding: 1rem 2rem;
-  position: sticky;
   top: 0;
   z-index: 100;
 }
@@ -470,8 +633,13 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .error-state {
@@ -552,30 +720,30 @@ export default {
     flex-direction: column;
     gap: 1rem;
   }
-  
+
   .content-header {
     flex-direction: column;
     gap: 1rem;
     text-align: center;
   }
-  
+
   .header-actions {
     width: 100%;
     justify-content: center;
   }
-  
+
   .events-table th,
   .events-table td {
     padding: 0.75rem 0.5rem;
     font-size: 0.875rem;
   }
-  
+
   .action-buttons {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .table-footer {
     flex-direction: column;
     gap: 1rem;
@@ -584,9 +752,17 @@ export default {
 }
 
 /* Text utilities */
-.text-left { text-align: left; }
-.text-center { text-align: center; }
-.text-right { text-align: right; }
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
 
 /* Date cells */
 .date-cell {

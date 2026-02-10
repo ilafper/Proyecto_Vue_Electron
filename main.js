@@ -118,6 +118,29 @@ ipcMain.handle('api-registro', async (event, usuarioData) => {
 
 
 
+ipcMain.handle('api-crear-evento', async (event, eventoDatos) => {
+  try {
+    const response = await fetch('http://localhost:3000/api/creareventos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(eventoDatos)
+    });
+    
+    const data = await response.json();
+    return data;
+    
+  } catch (error) {
+    console.error('Error crear evento3333:', error);
+    return { error: 'Error creando evento' };
+  }
+});
+
+
+
+
+
 
 
 
