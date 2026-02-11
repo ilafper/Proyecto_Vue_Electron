@@ -46,15 +46,6 @@
           <p>Cargando eventos...</p>
         </div>
 
-        <div class="error-state" v-else-if="error">
-          <Icon icon="mdi:alert-circle" width="48" class="error-icon" />
-          <h3>Error al cargar eventos</h3>
-          <p class="error-message">{{ error }}</p>
-          <button class="btn btn-secondary" @click="cargareventos">
-            Reintentar
-          </button>
-        </div>
-
         <div v-else-if="eventos && eventos.length === 0" class="empty-state">
           <Icon icon="mdi:calendar-remove" width="48" />
           <h3>No hay eventos registrados</h3>
@@ -68,6 +59,7 @@
         <div v-else class="table-responsive">
           <table class="events-table">
             <thead>
+
               <tr>
                 <th class="text-left">Nombre</th>
                 <th class="text-left">Descripción</th>
@@ -100,6 +92,7 @@
                 <td class="text-center date-cell">
                   {{ cada_evento.fechaFin }}
                 </td>
+
                 <td class="action-cell">
                   <div class="action-buttons">
                     <button class="btn-icon btn-edit" title="Editar evento"
@@ -214,7 +207,7 @@ export default {
     this.cargarDatos()
 
     this.cargareventos()
-    
+
     this.crearevento()
   },
 
