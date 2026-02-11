@@ -36,9 +36,7 @@
         </ul>
       </nav>
       
-
-
-
+      
 
       <!-- info user menu lateral inferior-->
       <div class="sidebar-footer" v-if="!sidebarCollapsed && user">

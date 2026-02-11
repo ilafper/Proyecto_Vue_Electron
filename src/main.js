@@ -9,6 +9,7 @@ const app = createApp(App);
 app.component('Icon', Icon)
 app.use(router);
 
+
 app.mount('#app');
 
 // 4. Log para confirmar

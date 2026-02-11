@@ -1,62 +1,165 @@
-<template >
-  <header>
-    <h2><RouterLink class="link" to="/admin">Home</RouterLink></H2>
-    <h2><RouterLink class="link" to="/eventosAdmin">Eventos</RouterLink></H2>
-  </header>
-  <div class="home-container"  v-if="user">
+<template>
+  <div class="dashboard-container">
+    <!-- Menú lateral -->
+    <div class="sidebar" :class="{ 'collapsed': sidebarCollapsed }">
+      <div class="sidebar-header">
+        <h3 v-if="!sidebarCollapsed">Menu Admin</h3>
+        <button class="toggle-btn" @click="toggleSidebar">
+           <Icon :icon="sidebarCollapsed ? 'mdi:chevron-right' : 'mdi:chevron-left'" width="20" />
+        </button>
+      </div>
+      
+      <nav class="sidebar-menu">
+        <ul>
+          <li>
+            <router-link to="/admin" class="menu-item">
+              <Icon icon="mdi:home-outline" width="28" />
+              <span v-if="!sidebarCollapsed" class="menu-text">Panel admin</span>
+            </router-link>
+          </li>
 
-    <h2>Usuario {{ user.rol }}</h2>
-    <h2>Bienvenido al sistema</h2>
-    
-    <!-- Mostrar mensaje de carga mientras se verifica -->
-    <div v-if="loading" class="loading">
-      Cargando datos...
+          <li>
+            <router-link to="/usersAdmin" class="menu-item">
+              <Icon icon="mdi:user" width="28" />
+              <span v-if="!sidebarCollapsed" class="menu-text">Administrar Usuarios</span>
+            </router-link>
+          </li>
+
+
+
+          <li>
+            <router-link  to="/eventosAdmin" class="menu-item">
+              <Icon icon="mdi:calendar-text" width="28" />
+              <span v-if="!sidebarCollapsed" class="menu-text">Administrar Eventos</span>
+            </router-link>
+          </li>
+        </ul>
+      </nav>
+      
+
+
+
+
+      <!-- info user menu lateral inferior-->
+      <div class="sidebar-footer" v-if="!sidebarCollapsed && user">
+        <div class="user-info">
+          <div class="user-avatar">{{ getInitials(user.nombre, user.apellidos) }}</div>
+          <div class="user-details">
+            <p class="user-name">{{ user.nombre }} {{ user.apellidos }}</p>
+            <p class="user-role">{{ user.rol }}</p>
+          </div>
+        </div>
+      </div>
     </div>
     
-    <!-- Mostrar datos del usuario cuando estén disponibles -->
-    <div class="datosUser" v-if="user && !loading">
-      <p>Nombre: {{ user.nombre }}</p>
-    </div>
-    
-    <!-- Mostrar mensaje si no hay usuario -->
-    <div v-if="!user && !loading" class="no-user">
-      No se encontraron datos de usuario
-    </div>
-    
-    <div class="content" v-if="user">
-      <button @click="salir" class="logout-button">
-        Cerrar Sesión
-      </button>
+    <!-- Contenido principal -->
+    <div class="main-content">
+      <header class="main-header">
+        <div class="header-left">
+          <h1>Home</h1>
+        </div>
+        <div class="header-right">
+          <button @click="salir" class="logout-button">
+            Salir
+          </button>
+        </div>
+      </header>
+      
+      <div class="content-wrapper">
+        <!-- Mostrar mensaje de carga mientras se verifica -->
+        <div v-if="loading" class="loading-container">
+          <div class="spinner"></div>
+          <p>Cargando datos...</p>
+        </div>
+        
+        <!-- Mostrar datos del usuario cuando estén disponibles -->
+        <div v-if="user && !loading">
+          <div class="welcome-section">
+            <h2>Bienvenido, {{ user.nombre }}!</h2>
+            <p class="welcome-text">Estamos encantados de tenerte aquí.  BLA BLA BLA BLA BLSA VBLAM ETC ETC</p>
+          </div>
+          
+          <div class="dashboard-cards">
+            <div class="dashboard-card">
+              <Icon icon="mdi:calendar-text" width="28" />
+              <h4>Administra los eventos</h4>
+              <p>Explora todos los eventos disponibles para participar.</p>
+              <router-link to="/eventosAdmin" class="card-link">
+                Ver eventos →
+              </router-link>
+            </div>
+            
+            <div class="dashboard-card">
+               <Icon icon="mdi:user" width="28" />
+              <h4> Gestiona los usuarios </h4>
+              <p>Gestiona los eventos en los que estás participando.</p>
+
+              <router-link to="/usersAdmin" class="card-link">
+                Ver los usuarios →
+              </router-link>
+            </div>
+          </div>
+        </div>
+        
+      
+        
+        <!-- Mostrar mensaje si no hay usuario -->
+        <div v-if="!user && !loading" class="no-user-message">
+          <div class="message-container">
+            <h3>No se encontraron datos de usuario</h3>
+            <p>Por favor, inicia sesión nuevamente.</p>
+            <button @click="goToLogin" class="login-button">
+              Ir a Inicio de Sesión
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'Home',
+  name: 'NormalDashboard',
   
   data() {
     return {
-      user: null,  
-      loading: true 
+      user: null,
+      loading: true,
+      sidebarCollapsed: false,
+      activeMenu: 'home',
+      pageTitle: 'Inicio'
     }
   },
   
   mounted() {
     this.cargarDatos()
+
   },
   
   methods: {
     cargarDatos() {
       console.log('Cargando datos del usuario...')
       
-      // Simular un pequeño delay para ver mejor el flujo
       setTimeout(() => {
         const usuarioDatos = localStorage.getItem('user')
         console.log('Usuario en localStorage:', usuarioDatos)
         
+        if (!usuarioDatos) {
+          console.log('No hay usuario, redirigiendo a login...')
+          this.$router.push('/login')
+        } else {
+          try {
+            this.user = JSON.parse(usuarioDatos)
+            console.log('Usuario cargado:', this.user)
+          } catch (error) {
+            console.error('Error parseando usuario:', error)
+            this.$router.push('/login')
+          }
+        }
+        
         this.loading = false
-      }, 100) // Pequeño delay para evitar parpadeo
+      }, 300)
     },
     
     salir() {
@@ -64,80 +167,438 @@ export default {
       localStorage.removeItem('user')
       this.user = null
       this.$router.push('/login')
+    },
+    
+    goToLogin() {
+      this.$router.push('/login')
+    },
+    
+    toggleSidebar() {
+      this.sidebarCollapsed = !this.sidebarCollapsed
+    },
+    
+    
+    getInitials(nombre, apellidos) {
+      if (!nombre || !apellidos) return 'U'
+      return (nombre.charAt(0) + apellidos.charAt(0)).toUpperCase()
     }
   }
 }
 </script>
 
 <style scoped>
-
-header{
+.dashboard-container {
   display: flex;
-  flex-direction: row;
-  width: 100%;
-  border: 2px solid grey;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+/* Estilos del menú lateral */
+.sidebar {
+  width: 250px;
+  background: linear-gradient(180deg, #2c3e50 0%, #1a2530 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.sidebar.collapsed {
+  width: 70px;
+}
+
+.sidebar-header {
   padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-header .link{
-  text-decoration: none;
-  color: rgb(170, 166, 166);
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+
+
+
+
+.toggle-btn {
+  background-color: rgba(255, 255, 255, 0.103);
+  border: none;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: bold;
-  font-size: 20px;
 }
-.home-container {
-  padding: 40px;
-  text-align: center;
-  max-width: 800px;
-  margin: 0 auto;
-  height: auto;
+
+.toggle-btn:hover {
+  transform: scale(1.005);
+}
+
+.sidebar-menu {
+  flex: 1;
+  padding: 20px 0;
+}
+
+.sidebar-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-menu li {
+  margin-bottom: 5px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  transition: all 0.3s;
+  border-left: 4px solid transparent;
+}
+
+.menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: white;
+  border-left-color: rgba(255, 255, 255, 0.2);
+}
+
+.menu-item.active {
+  background-color: rgba(52, 152, 219, 0.2);
+  color: white;
+  border-left-color: #3498db;
+}
+
+.menu-icon {
+  font-size: 1.2rem;
+  margin-right: 15px;
+  min-width: 24px;
+}
+
+.menu-text {
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sidebar-footer {
+  padding: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  background-color: #3498db;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 12px;
+}
+
+.user-details {
+  flex: 1;
+}
+
+.user-name {
+  margin: 0 0 5px 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.user-role {
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Estilos del contenido principal */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.main-header {
+  background-color: white;
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  z-index: 5;
+}
+
+.main-header h1 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.8rem;
 }
 
 .logout-button {
-  padding: 12px 24px;
-  background-color: #dc3545;
+  padding: 10px 20px;
+  background-color: #e74c3c;
   color: white;
   border: none;
   border-radius: 6px;
-  font-size: 16px;
+  font-size: 0.95rem;
   cursor: pointer;
-  margin-top: 30px;
   transition: background-color 0.3s;
+  font-weight: 500;
 }
 
 .logout-button:hover {
-  background-color: #c82333;
+  background-color: #c0392b;
 }
 
-.datosUser {
-  width: 300px;
-  background-color: #4CAF50;
+.content-wrapper {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+/* Estilos de carga */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Estilos del contenido principal */
+.welcome-section {
+  background: linear-gradient(135deg, #3498db, #2c3e50);
   color: white;
-  height: auto;
-  padding: 20px;
-  margin: 20px auto;
+  padding: 30px;
   border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
 }
 
-.datosUser p {
-  margin: 10px 0;
-  font-size: 16px;
-  text-align: left;
+.welcome-section h2 {
+  margin: 0 0 10px 0;
+  font-size: 2rem;
 }
 
-.loading {
-  padding: 20px;
+.welcome-text {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.card-header {
+  background-color: #f8f9fa;
+  padding: 20px 30px;
+  border-bottom: 1px solid #eee;
+}
+
+.card-header h3 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.card-content {
+  padding: 30px;
+}
+
+.info-row {
+  display: flex;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.info-row:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.info-label {
+  width: 200px;
+  font-weight: 600;
+  color: #555;
+}
+
+.info-value {
+  flex: 1;
+  color: #333;
+}
+
+.role-badge {
+  display: inline-block;
+  background-color: #e8f4fc;
+  color: #3498db;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.dashboard-card {
+  background-color: white;
+  border-radius: 10px;
+  padding: 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.card-icon {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+}
+
+.dashboard-card h4 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+}
+
+.dashboard-card p {
   color: #666;
-  font-size: 18px;
+  margin-bottom: 20px;
+  line-height: 1.5;
 }
 
-.no-user {
-  padding: 20px;
-  color: #dc3545;
-  font-size: 18px;
-  background-color: #ffe6e6;
-  border-radius: 8px;
-  margin: 20px auto;
-  width: 300px;
+.card-link {
+  color: #3498db;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+  transition: color 0.3s;
+}
+
+.card-link:hover {
+  color: #2980b9;
+}
+
+/* Estilos para otras páginas */
+.page-content {
+  background-color: white;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.page-content h2 {
+  color: #2c3e50;
+  margin-top: 0;
+}
+
+/* Estilos para mensaje sin usuario */
+.no-user-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+}
+
+.message-container {
+  background-color: white;
+  border-radius: 10px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  max-width: 400px;
+}
+
+.message-container h3 {
+  color: #e74c3c;
+  margin-bottom: 15px;
+}
+
+.login-button {
+  padding: 12px 25px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 20px;
+}
+
+.login-button:hover {
+  background-color: #2980b9;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    height: 100%;
+    transform: translateX(-100%);
+    z-index: 100;
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .sidebar.collapsed {
+    width: 250px;
+  }
+  
+  .dashboard-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .info-row {
+    flex-direction: column;
+  }
+  
+  .info-label {
+    width: 100%;
+    margin-bottom: 5px;
+  }
 }
 </style>

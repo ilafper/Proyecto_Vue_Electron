@@ -1,208 +1,132 @@
 <template>
-  <div class="eventos-container">
-    <!-- Header con navegación -->
-    <header class="admin-header">
-      <div class="header-content">
-        <h1 class="app-title">Panel de Administración</h1>
-        <nav class="nav-links">
-
-          <RouterLink class="nav-link" to="/admin">
-            <Icon icon="mdi:home" width="20" />
-            <span>Home</span>
-          </RouterLink>
-
-          <RouterLink class="nav-link" to="/eventosAdmin">
-            <Icon icon="mdi:calendar" width="20" />
-            <span>Eventos</span>
-          </RouterLink>
-
-          <RouterLink class="nav-link" to="/usersAdmin">
-            <Icon icon="mdi:users" width="20" />
-            <span>Usuarios</span>
-          </RouterLink>
-        </nav>
+  <div class="dashboard-container">
+    <!-- Menú lateral -->
+    <div class="sidebar" :class="{ 'collapsed': sidebarCollapsed }">
+      <div class="sidebar-header">
+        <h3 v-if="!sidebarCollapsed">Menu Admin</h3>
+        <button class="toggle-btn" @click="toggleSidebar">
+          <Icon :icon="sidebarCollapsed ? 'mdi:chevron-right' : 'mdi:chevron-left'" width="20" />
+        </button>
       </div>
-    </header>
+
+      <nav class="sidebar-menu">
+        <ul>
+          <li>
+            <router-link to="/admin" class="menu-item">
+              <Icon icon="mdi:home-outline" width="28" />
+              <span v-if="!sidebarCollapsed" class="menu-text">Panel admin</span>
+            </router-link>
+          </li>
+
+          <li>
+            <router-link to="/usersAdmin" class="menu-item">
+              <Icon icon="mdi:user" width="28" />
+              <span v-if="!sidebarCollapsed" class="menu-text">Administrar Usuarios</span>
+            </router-link>
+          </li>
+
+
+
+          <li>
+            <router-link to="/eventosAdmin" class="menu-item">
+              <Icon icon="mdi:calendar-text" width="28" />
+              <span v-if="!sidebarCollapsed" class="menu-text">Administrar Eventos</span>
+            </router-link>
+          </li>
+        </ul>
+      </nav>
+
+
+
+
+
+      <!-- info user menu lateral inferior-->
+      <div class="sidebar-footer" v-if="!sidebarCollapsed && user">
+        <div class="user-info">
+          <div class="user-avatar">{{ getInitials(user.nombre, user.apellidos) }}</div>
+          <div class="user-details">
+            <p class="user-name">{{ user.nombre }} {{ user.apellidos }}</p>
+            <p class="user-role">{{ user.rol }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Contenido principal -->
-    <main class="main-content">
-      <div class="content-header">
-        <h2 class="page-title">
-          <Icon icon="mdi:calendar-text" width="28" />
-          Gestión de Eventos
-        </h2>
-        <div class="header-actions">
-          <button @click="abrirModal" class="btn btn-primary">
-            <Icon icon="mdi:plus" width="18" />
-            Nuevo Evento
+    <div class="main-content">
+      <header class="main-header">
+        <div class="header-left">
+          <h1>Home</h1>
+        </div>
+        <div class="header-right">
+          <button @click="salir" class="logout-button">
+            Salir
           </button>
         </div>
-      </div>
+      </header>
 
-      <!-- Tabla de eventos -->
-      <div class="card table-container">
-        <div class="loading-state" v-if="loading">
+      <div class="content-wrapper">
+        <!-- Mostrar mensaje de carga mientras se verifica -->
+        <div v-if="loading" class="loading-container">
           <div class="spinner"></div>
-          <p>Cargando eventos...</p>
+          <p>Cargando datos...</p>
         </div>
 
-        <div v-else-if="eventos && eventos.length === 0" class="empty-state">
-          <Icon icon="mdi:calendar-remove" width="48" />
-          <h3>No hay eventos registrados</h3>
-          <p>Comienza creando tu primer evento</p>
-          <button @click="abrirModal" class="btn btn-primary">
-            <Icon icon="mdi:plus" width="18" />
-            Crear Evento
-          </button>
+        <!-- Mostrar datos del usuario cuando estén disponibles -->
+        <div v-if="user && !loading">
+          <div class="welcome-section">
+            <h2>Bienvenido, {{ user.nombre }}!</h2>
+            <p class="welcome-text">Estamos encantados de tenerte aquí. BLA BLA BLA BLA BLSA VBLAM ETC ETC</p>
+          </div>
+
+          <div class="dashboard-cards">
+            <div class="dashboard-card">
+              <Icon icon="mdi:calendar-text" width="28" />
+              <h4>Administra los eventos</h4>
+              <p>Explora todos los eventos disponibles para participar.</p>
+              <router-link to="/eventosAdmin" class="card-link">
+                Ver eventos →
+              </router-link>
+            </div>
+
+            <div class="dashboard-card">
+              <Icon icon="mdi:user" width="28" />
+              <h4> Gestiona los usuarios </h4>
+              <p>Gestiona los eventos en los que estás participando.</p>
+
+              <router-link to="/usersAdmin" class="card-link">
+                Ver los usuarios →
+              </router-link>
+            </div>
+          </div>
         </div>
 
-        <div v-else class="table-responsive">
-          <table class="events-table">
-            <thead>
 
-              <tr>
-                <th class="text-left">Nombre</th>
-                <th class="text-left">Descripción</th>
-                <th class="text-center">Plazas Total</th>
-                <th class="text-center">Disponibles</th>
-                <th class="text-center">Inicio</th>
-                <th class="text-center">Fin</th>
-                <th class="text-center">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="cada_evento in eventos">
-                <td class="event-name">
-                  <strong>{{ cada_evento.nombreEvento }}</strong>
-                </td>
-                <td class="event-description">
-                  {{ truncateText(cada_evento.descripcionEvento, 40) }}
-                </td>
-                <td class="text-center">
-                  <span class="badge">{{ cada_evento.plazasTotales }}</span>
-                </td>
-                <td class="text-center">
-                  <span :class="['badge', cada_evento.PlazasDisponibles]">
-                    {{ cada_evento.PlazasDisponibles }}
-                  </span>
-                </td>
-                <td class="text-center date-cell">
-                  {{ cada_evento.fechaInicio }}
-                </td>
-                <td class="text-center date-cell">
-                  {{ cada_evento.fechaFin }}
-                </td>
 
-                <td class="action-cell">
-                  <div class="action-buttons">
-                    <button class="btn-icon btn-edit" title="Editar evento"
-                      @click="editarEvento(cada_evento.code_Evento)">
-                      <Icon icon="mdi:pencil" width="18" />
-                    </button>
-                    <button class="btn-icon btn-delete" title="Eliminar evento"
-                      @click="eliminarEvento(cada_evento.code_Evento)">
-                      <Icon icon="mdi:trash-can-outline" width="18" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- Mostrar mensaje si no hay usuario -->
+        <div v-if="!user && !loading" class="no-user-message">
+          <div class="message-container">
+            <h3>No se encontraron datos de usuario</h3>
+            <p>Por favor, inicia sesión nuevamente.</p>
+            <button @click="goToLogin" class="login-button">
+              Ir a Inicio de Sesión
+            </button>
+          </div>
         </div>
-      </div>
-
-      <!-- Footer de la tabla -->
-      <div class="table-footer" v-if="eventos && eventos.length > 0">
-        <div class="footer-info">
-          <p>Mostrando {{ eventos.length }} eventos</p>
-        </div>
-        <div class="pagination" v-if="totalPages > 1">
-          <button class="btn-pagination" :disabled="currentPage === 1">
-            <Icon icon="mdi:chevron-left" width="18" />
-          </button>
-          <span class="page-info">Página {{ currentPage }} de {{ totalPages }}</span>
-          <button class="btn-pagination" :disabled="currentPage === totalPages">
-            <Icon icon="mdi:chevron-right" width="18" />
-          </button>
-        </div>
-      </div>
-
-    </main>
-    <footer>
-      asd
-    </footer>
-
-    <div v-if="modalVisible" class="modal-overlay" @click="cerrarModal">
-      <div class="modal-content" @click.stop>
-        <!-- Cabecera -->
-        <div class="modal-header">
-          <h3>Creacion eventos</h3>
-          <button class="close-btn" @click="cerrarModal">×</button>
-        </div>
-
-        <form @submit.prevent="crearevento" class="eventos-form">
-
-          <div class="input-group">
-            <label>Nombre Evento</label>
-            <input type="text" v-model="nombreEvento" placeholder="Firma de Autógrafos" required />
-          </div>
-
-          <div class="input-group">
-            <label>Descripcion</label>
-            <input type="textarea" v-model="descripcionEvento" placeholder="Encuentro con artistas locales..." />
-          </div>
-
-          <div class="input-group">
-            <label>Plazas Totales</label>
-            <input type="number" v-model="plazasTotales" required />
-          </div>
-          <div class="input-group">
-            <label>fecha</label>
-            <input type="date" v-model="fecha" required />
-          </div>
-
-          <div class="input-group">
-            <label>Hora inicio</label>
-            <input type="date" v-model="horaInicio" required />
-          </div>
-
-          <div class="input-group">
-            <label>Hora Fin</label>
-            <input type="date" v-model="horaFin" required />
-          </div>
-
-          <div v-if="error" class="error">
-            {{ error }}
-          </div>
-
-          <button type="submit" :disabled="loading" class="crearEvento">
-            {{ loading ? 'Cargando...' : 'Crear evento' }}
-          </button>
-        </form>
       </div>
     </div>
   </div>
-
-
 </template>
 
 <script>
-import { Icon } from '@iconify/vue'
-
-
 export default {
   name: 'EventosAdmin',
-
-  components: {
-    Icon
-  },
-
 
   data() {
     return {
       user: null,
-      error: null,
-      currentPage: 1,
+      loading: true,
+      sidebarCollapsed: false,
       eventos: [],
       modalVisible: false,
     }
@@ -214,6 +138,7 @@ export default {
     this.cargareventos()
 
     this.crearevento()
+
   },
 
   methods: {
@@ -236,8 +161,9 @@ export default {
         plazasTotales: this.plazasTotales,
         fecha: this.fecha,
         horaInicio: this.horaInicio,
-        horaFin:this.horaFin
+        horaFin: this.horaFin
       })
+
 
       try {
         // Verificar Electron API
@@ -265,8 +191,6 @@ export default {
         this.loading = false
       }
     },
-
-
     cargarDatos() {
       setTimeout(() => {
         const usuarioDatos = localStorage.getItem('user')
@@ -292,7 +216,6 @@ export default {
         if (response.success) {
           this.eventos = response.eventos.eventosFormateados
           console.log(this.eventos);
-
         } else {
           this.error = response.message
         }
@@ -320,322 +243,245 @@ export default {
       return text.length > maxLength
         ? text.substring(0, maxLength) + '...'
         : text
+    },
+
+
+
+
+
+    salir() {
+      console.log('Cerrando sesión...')
+      localStorage.removeItem('user')
+      this.user = null
+      this.$router.push('/login')
+    },
+
+    goToLogin() {
+      this.$router.push('/login')
+    },
+
+    toggleSidebar() {
+      this.sidebarCollapsed = !this.sidebarCollapsed
+    },
+
+
+    getInitials(nombre, apellidos) {
+      if (!nombre || !apellidos) return 'U'
+      return (nombre.charAt(0) + apellidos.charAt(0)).toUpperCase()
     }
   }
 }
 </script>
 
 <style scoped>
-.crearEvento {
-  cursor: pointer;
-  margin-top: 10px;
-  width: 100%;
-  border: none;
-  padding: 10px;
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+/* Estilos del menú lateral */
+.sidebar {
+  width: 250px;
+  background: linear-gradient(180deg, #2c3e50 0%, #1a2530 100%);
   color: white;
-  background-color: rgba(117, 50, 117, 0.658);
-}
-
-.close-btn {
-  border: none;
-  background: none;
-  position: relative;
-  left: 430px;
-  top: -40px;
-  font-size: 40px;
-  cursor: pointer;
-}
-
-.input-group {
   display: flex;
   flex-direction: column;
+  transition: width 0.3s ease;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 10;
 }
 
-.input-group label {
-  margin-bottom: 8px;
-  font-weight: 500;
-  color: #555;
+.sidebar.collapsed {
+  width: 70px;
 }
 
-.input-group input {
-  padding: 12px 15px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 16px;
-  transition: border-color 0.3s;
-}
-
-.input-group input:focus {
-  outline: none;
-  border-color: #007bff;
-}
-
-.input-group input:disabled {
-  background-color: #f8f9fa;
-  cursor: not-allowed;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  padding: 30px;
-  background: white;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-}
-
-body {
-  height: auto;
-}
-
-.eventos-container {
-  height: 100%;
-  background: rgb(148, 148, 182);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-
-.admin-header {
-  background: white;
-  padding: 1rem 2rem;
-  top: 0;
-  z-index: 100;
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.app-title {
-  color: var(--primary-color);
-  font-size: 1.5rem;
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+
+
+
+
+.toggle-btn {
+  background-color: rgba(255, 255, 255, 0.103);
+  border: none;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.toggle-btn:hover {
+  transform: scale(1.005);
+}
+
+.sidebar-menu {
+  flex: 1;
+  padding: 20px 0;
+}
+
+.sidebar-menu ul {
+  list-style: none;
+  padding: 0;
   margin: 0;
 }
 
-.nav-links {
-  display: flex;
-  gap: 1rem;
+.sidebar-menu li {
+  margin-bottom: 5px;
 }
 
-.nav-link {
+.menu-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  padding: 15px 20px;
+  color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
-  color: var(--gray-color);
-  border-radius: var(--border-radius);
-  transition: all 0.3s ease;
+  transition: all 0.3s;
+  border-left: 4px solid transparent;
 }
 
-.nav-link:hover {
-  background-color: #f8f9fa;
-  color: var(--primary-color);
-}
-
-.nav-link.active {
-  background-color: var(--primary-color);
+.menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
   color: white;
+  border-left-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Main content */
+.menu-item.active {
+  background-color: rgba(52, 152, 219, 0.2);
+  color: white;
+  border-left-color: #3498db;
+}
+
+.menu-icon {
+  font-size: 1.2rem;
+  margin-right: 15px;
+  min-width: 24px;
+}
+
+.menu-text {
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sidebar-footer {
+  padding: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  background-color: #3498db;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 12px;
+}
+
+.user-details {
+  flex: 1;
+}
+
+.user-name {
+  margin: 0 0 5px 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.user-role {
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Estilos del contenido principal */
 .main-content {
-  max-width: 1200px;
-  margin: 2rem auto;
-  padding: 0 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
 }
 
-.content-header {
+.main-header {
+  background-color: white;
+  padding: 20px 30px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  z-index: 5;
 }
 
-.page-title {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: var(--dark-color);
-  font-size: 1.75rem;
+.main-header h1 {
   margin: 0;
+  color: #2c3e50;
+  font-size: 1.8rem;
 }
 
-.header-actions {
-  display: flex;
-  gap: 1rem;
-}
-
-/* Buttons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+.logout-button {
+  padding: 10px 20px;
+  background-color: #e74c3c;
+  color: white;
   border: none;
-  font-weight: 600;
+  border-radius: 6px;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s;
+  font-weight: 500;
 }
 
-.btn-primary {
-  background-color: white;
-  color: rgb(0, 0, 0);
+.logout-button:hover {
+  background-color: #c0392b;
 }
 
-.btn-primary:hover {
-  transform: translateY(-2px);
+.content-wrapper {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
 }
 
-.btn-secondary {
-  background-color: white;
-  color: var(--primary-color);
-  border: 2px solid var(--primary-color);
-}
-
-.btn-secondary:hover {
-  background-color: #f8f9fa;
-}
-
-.btn-icon {
-  background: none;
-  border: none;
-  padding: 0.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-edit {
-  color: var(--primary-color);
-}
-
-.btn-edit:hover {
-  background-color: rgba(67, 97, 238, 0.1);
-}
-
-.btn-delete {
-  color: var(--danger-color);
-}
-
-.btn-delete:hover {
-  background-color: rgba(247, 37, 133, 0.1);
-}
-
-.btn-view {
-  color: var(--gray-color);
-}
-
-.btn-view:hover {
-  background-color: rgba(108, 117, 125, 0.1);
-}
-
-/* Card and table container */
-.card {
-  background: white;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
-  padding: 2rem;
-}
-
-.table-responsive {
-  overflow-x: auto;
-}
-
-/* Table styles */
-.events-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.events-table thead {
-  background-color: #f8f9fa;
-}
-
-.events-table th {
-  padding: 1rem;
-  color: var(--dark-color);
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 0.875rem;
-  letter-spacing: 0.05em;
-  border-bottom: 2px solid var(--border-color);
-}
-
-.events-table td {
-  padding: 1rem;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.events-table tbody tr {
-  transition: background-color 0.3s ease;
-}
-
-.events-table tbody tr:hover {
-  background-color: #f8f9fa;
-}
-
-/* Badges */
-.badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.badge-success {
-  background-color: rgba(76, 201, 240, 0.1);
-  color: var(--success-color);
-}
-
-.badge-warning {
-  background-color: rgba(248, 150, 30, 0.1);
-  color: var(--warning-color);
-}
-
-.badge-danger {
-  background-color: rgba(247, 37, 133, 0.1);
-  color: var(--danger-color);
-}
-
-/* States */
-.loading-state {
+/* Estilos de carga */
+.loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4rem;
-  color: var(--gray-color);
+  height: 300px;
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid var(--primary-color);
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
+  margin-bottom: 20px;
 }
 
 @keyframes spin {
@@ -648,145 +494,203 @@ body {
   }
 }
 
-.error-state {
-  text-align: center;
-  padding: 3rem;
-  color: var(--danger-color);
+/* Estilos del contenido principal */
+.welcome-section {
+  background: linear-gradient(135deg, #3498db, #2c3e50);
+  color: white;
+  padding: 30px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
 }
 
-.error-icon {
-  margin-bottom: 1rem;
+.welcome-section h2 {
+  margin: 0 0 10px 0;
+  font-size: 2rem;
 }
 
-.error-message {
-  color: var(--gray-color);
-  margin: 1rem 0;
+.welcome-text {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin: 0;
 }
 
-.empty-state {
-  text-align: center;
-  padding: 4rem;
-  color: var(--gray-color);
-}
-
-.empty-state h3 {
-  margin: 1rem 0 0.5rem;
-  color: var(--dark-color);
-}
-
-/* Footer */
-.table-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 2rem;
-  padding: 1rem;
-  background: white;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
-}
-
-.footer-info {
-  color: var(--gray-color);
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.btn-pagination {
-  background: none;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-pagination:hover:not(:disabled) {
+.card-header {
   background-color: #f8f9fa;
-  border-color: var(--primary-color);
+  padding: 20px 30px;
+  border-bottom: 1px solid #eee;
 }
 
-.btn-pagination:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.card-header h3 {
+  margin: 0;
+  color: #2c3e50;
 }
 
-.page-info {
-  color: var(--gray-color);
-  font-size: 0.875rem;
+.card-content {
+  padding: 30px;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .content-header {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
-
-  .header-actions {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .events-table th,
-  .events-table td {
-    padding: 0.75rem 0.5rem;
-    font-size: 0.875rem;
-  }
-
-  .action-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .table-footer {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
+.info-row {
+  display: flex;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-/* Text utilities */
-.text-left {
-  text-align: left;
+.info-row:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
-.text-center {
-  text-align: center;
-}
-
-.text-right {
-  text-align: right;
-}
-
-/* Date cells */
-.date-cell {
-  font-family: 'Courier New', monospace;
-  font-size: 0.875rem;
-  color: var(--gray-color);
-}
-
-/* Event name */
-.event-name {
+.info-label {
+  width: 200px;
   font-weight: 600;
-  color: var(--dark-color);
+  color: #555;
 }
 
-/* Event description */
-.event-description {
-  max-width: 300px;
+.info-value {
+  flex: 1;
+  color: #333;
+}
+
+.role-badge {
+  display: inline-block;
+  background-color: #e8f4fc;
+  color: #3498db;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.dashboard-card {
+  background-color: white;
+  border-radius: 10px;
+  padding: 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.card-icon {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+}
+
+.dashboard-card h4 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+}
+
+.dashboard-card p {
+  color: #666;
+  margin-bottom: 20px;
   line-height: 1.5;
-  color: var(--gray-color);
+}
+
+.card-link {
+  color: #3498db;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+  transition: color 0.3s;
+}
+
+.card-link:hover {
+  color: #2980b9;
+}
+
+/* Estilos para otras páginas */
+.page-content {
+  background-color: white;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.page-content h2 {
+  color: #2c3e50;
+  margin-top: 0;
+}
+
+/* Estilos para mensaje sin usuario */
+.no-user-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+}
+
+.message-container {
+  background-color: white;
+  border-radius: 10px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  max-width: 400px;
+}
+
+.message-container h3 {
+  color: #e74c3c;
+  margin-bottom: 15px;
+}
+
+.login-button {
+  padding: 12px 25px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 20px;
+}
+
+.login-button:hover {
+  background-color: #2980b9;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    height: 100%;
+    transform: translateX(-100%);
+    z-index: 100;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar.collapsed {
+    width: 250px;
+  }
+
+  .dashboard-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .info-row {
+    flex-direction: column;
+  }
+
+  .info-label {
+    width: 100%;
+    margin-bottom: 5px;
+  }
 }
 </style>
