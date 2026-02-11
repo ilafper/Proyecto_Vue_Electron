@@ -157,13 +157,18 @@
             <input type="number" v-model="plazasTotales" required />
           </div>
           <div class="input-group">
-            <label>fechaInicio</label>
-            <input type="date" v-model="fechaInicio" required />
+            <label>fecha</label>
+            <input type="date" v-model="fecha" required />
           </div>
 
           <div class="input-group">
-            <label>fecha Fin</label>
-            <input type="date" v-model="fechaFin" required />
+            <label>Hora inicio</label>
+            <input type="date" v-model="horaInicio" required />
+          </div>
+
+          <div class="input-group">
+            <label>Hora Fin</label>
+            <input type="date" v-model="horaFin" required />
           </div>
 
           <div v-if="error" class="error">
@@ -229,8 +234,9 @@ export default {
         nombreEvento: this.nombreEvento,
         descripcionEvento: this.descripcionEvento,
         plazasTotales: this.plazasTotales,
-        fechaInicio: this.fechaInicio,
-        fechaFin: this.fechaFin
+        fecha: this.fecha,
+        horaInicio: this.horaInicio,
+        horaFin:this.horaFin
       })
 
       try {
@@ -244,8 +250,9 @@ export default {
           this.nombreEvento,
           this.descripcionEvento,
           this.plazasTotales,
-          this.fechaInicio,
-          this.fechaFin,
+          this.fecha,
+          this.horaInicio,
+          this.horaFin,
         )
 
         console.log('Resultado:', resultado)

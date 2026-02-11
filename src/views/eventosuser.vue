@@ -87,12 +87,11 @@
                         <div class="info-principal">
                             <h3>{{ cada_evento.nombreEvento }}</h3>
                             <p class="plazas">
+                                <p>Disponibles <strong>{{ cada_evento.PlazasDisponibles }}</strong> de <strong>{{ cada_evento.plazasTotales }}</strong></p>
+                            </p>
 
-                                <strong>{{ cada_evento.PlazasDisponibles }}</strong>
-                            </p>
-                            <p class="estado" :class="cada_evento.estado">
-                                <p>Estado: <span>{{ cada_evento.estado }}</span></p>
-                            </p>
+                            <p><strong>Estado:</strong> {{ cada_evento.estado }}</p>
+                           
                         </div>
 
                         <!-- Boton informacion-->
@@ -105,12 +104,8 @@
 
                         <!-- Información adicional (oculta por defecto) -->
                         <div v-if="mostrarDetalles[cada_evento.code_Evento]" class="info-adicional">
-                            <p><span class="etiqueta">Inicio:</span> {{ cada_evento.fechaInicio }}
-                            </p>
+                            <p><span class="etiqueta">Inicio:</span> {{ cada_evento.fechaInicio }}</p>
                             <p><span class="etiqueta">Fin:</span> {{ cada_evento.fechaFin }}</p>
-                            <p><span class="etiqueta">Lugar:</span> {{ cada_evento.lugar || 'Por definir' }}</p>
-                            <p><span class="etiqueta">Organizador:</span> {{ cada_evento.organizador || 'Admin' }}
-                            </p>
                             <p class="descripcion-completa">{{ cada_evento.descripcionEvento }}</p>
                         </div>
                     </div>
@@ -228,11 +223,13 @@ export default {
 <style scoped>
 .targeta_evento {
     position: relative;
-    width: 300px;
+    width: 250px;
     background: white;
-    border-radius: 5px;
+    border-radius: 10px;
     padding: 10px;
-    border: 2px solid #293A4B;
+    border-bottom: 5px solid #293A4B;
+    border-right: 5px solid #293A4B;
+    box-shadow: 7px 7px 5px rgba(117, 117, 117, 0.3);
 }
 
 .targeta_evento:hover {
@@ -240,8 +237,8 @@ export default {
 }
 
 .info-principal h3 {
-    margin: 0 0 12px 0;
-    color: #2c3e50;
+    margin-right:30px;
+    color: #374b5f;
     font-size: 1.2rem;
     font-weight: 600;
 }
@@ -267,25 +264,10 @@ export default {
     margin-top: 8px;
 }
 
-.estado.activo {
-    background: #e3f2fd;
-    color: #1976d2;
-}
-
-.estado.finalizado {
-    background: #ffebee;
-    color: #c62828;
-}
-
-.estado.proximo {
-    background: #e8f5e9;
-    color: #2e7d32;
-}
-
 .btn-detalles {
     position: absolute;
-    top: 10px;
-    left: 260px;
+    top: 5px;
+    left: 213px;
     color: black;
     border-radius: 50%;
     padding: 1px;
@@ -334,6 +316,7 @@ export default {
     padding: 10px;
     display: flex;
     flex-wrap: wrap;
+    justify-content: flex-start;
     gap: 20px;
 }
 
@@ -384,7 +367,8 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.3s;
+    font-weight: bold;
+    font-size: 15px;
 }
 
 .toggle-btn:hover {

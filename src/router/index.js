@@ -11,14 +11,14 @@ import miseventos from "../views/misEventos.vue";
 //diferenete srutas de las vistas para redirigir, aaui es donde las pondremos y las usaremos mas adelenate
 
 const routes = [
-  {path: "/",redirect: "/login",},{path: "/login",component: LoginView,},
-  {path: "/home",component: HomeView,},
-  {path: "/admin",component: AdminView,},
-  {path: "/register",component: registerView,},
-  {path: "/eventosAdmin",component: EventosAdmin,},
-  {path: "/usersAdmin",component: userAdmin,},
-  {path: "/eventosUser",component: eventosuser,},
-  {path: "/misEventos",component: miseventos,},
+  {path: "/",redirect: "/login",},{path: "/login",component: LoginView},
+  {path: "/home",component: HomeView},
+  {path: "/admin",component: AdminView},
+  {path: "/register",component: registerView},
+  {path: "/eventosAdmin",component: EventosAdmin},
+  {path: "/usersAdmin",component: userAdmin},
+  {path: "/eventosUser",component: eventosuser},
+  {path: "/misEventos",component: miseventos},
 ];
 
 

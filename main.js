@@ -116,7 +116,7 @@ ipcMain.handle('api-registro', async (event, usuarioData) => {
 
 
 
-
+// crear eventos
 
 ipcMain.handle('api-crear-evento', async (event, eventoDatos) => {
   try {

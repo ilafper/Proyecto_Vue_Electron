@@ -28,8 +28,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   //   } = req.body;
 
 
-  crearEvento: (nombreEvento,descripcionEvento,plazasTotales, fechaInicio, fechaFin) => {
-    return ipcRenderer.invoke('api-crear-evento', { nombreEvento,descripcionEvento,plazasTotales, fechaInicio,fechaFin});
+  crearEvento: (nombreEvento,descripcionEvento,plazasTotales, fecha, horaInicio, horaFin) => {
+    return ipcRenderer.invoke('api-crear-evento', { nombreEvento,descripcionEvento,plazasTotales,fecha, horaInicio,horaFin});
   },
   
 });
