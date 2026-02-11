@@ -8,6 +8,7 @@
 
 
 <script>
+
 import Login from './views/loginView.vue'
 import Home from './views/home.vue'
 

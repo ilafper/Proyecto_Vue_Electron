@@ -15,6 +15,7 @@
             <Icon icon="mdi:calendar" width="20" />
             <span>Eventos</span>
           </RouterLink>
+
           <RouterLink class="nav-link" to="/usersAdmin">
             <Icon icon="mdi:users" width="20" />
             <span>Usuarios</span>
@@ -137,6 +138,7 @@
     <footer>
       asd
     </footer>
+
     <div v-if="modalVisible" class="modal-overlay" @click="cerrarModal">
       <div class="modal-content" @click.stop>
         <!-- Cabecera -->
@@ -146,6 +148,7 @@
         </div>
 
         <form @submit.prevent="crearevento" class="eventos-form">
+
           <div class="input-group">
             <label>Nombre Evento</label>
             <input type="text" v-model="nombreEvento" placeholder="Firma de Autógrafos" required />
@@ -155,6 +158,7 @@
             <label>Descripcion</label>
             <input type="textarea" v-model="descripcionEvento" placeholder="Encuentro con artistas locales..." />
           </div>
+
           <div class="input-group">
             <label>Plazas Totales</label>
             <input type="number" v-model="plazasTotales" required />
@@ -208,7 +212,9 @@ export default {
 
   mounted() {
     this.cargarDatos()
+
     this.cargareventos()
+    
     this.crearevento()
   },
 

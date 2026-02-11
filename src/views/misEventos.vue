@@ -5,30 +5,27 @@
       <div class="sidebar-header">
         <h3 v-if="!sidebarCollapsed">Menu</h3>
         <button class="toggle-btn" @click="toggleSidebar">
-           <Icon :icon="sidebarCollapsed ? 'mdi:chevron-right' : 'mdi:chevron-left'" width="20" />
+          {{ sidebarCollapsed ? '>' : '<' }}
         </button>
       </div>
       
       <nav class="sidebar-menu">
         <ul>
           <li>
-            <router-link to="/home" class="menu-item">
-              <Icon icon="mdi:home-outline" width="28" />
+            <router-link to="/home" class="menu-item" :class="{ 'active': activeMenu === 'home' }" @click="setActiveMenu('home')">
+               <Icon icon="mdi:home-outline" width="28" />
               <span v-if="!sidebarCollapsed" class="menu-text">Home</span>
             </router-link>
           </li>
 
           <li>
-            <router-link to="/eventosUser" class="menu-item">
+            <router-link to="/eventosUser" class="menu-item" :class="{ 'active': activeMenu === 'eventos' }" @click="setActiveMenu('eventos')">
               <Icon icon="mdi:calendar-text" width="28" />
               <span v-if="!sidebarCollapsed" class="menu-text">Eventos</span>
             </router-link>
           </li>
-
-
-
           <li>
-            <router-link to="/misEventos" class="menu-item">
+            <router-link to="/misEventos" class="menu-item" :class="{ 'active': activeMenu === 'mis-eventos' }" @click="setActiveMenu('mis-eventos')">
               <Icon icon="mdi:ticket-confirmation-outline" width="28" />
               <span v-if="!sidebarCollapsed" class="menu-text">Mis Eventos</span>
             </router-link>
@@ -56,10 +53,10 @@
     <div class="main-content">
       <header class="main-header">
         <div class="header-left">
-          <h1>Home</h1>
+          <h1>Mis eventos</h1>
         </div>
         <div class="header-right">
-          <button @click="salir" class="logout-button">
+          <button @click="handleLogout" class="logout-button">
             Salir
           </button>
         </div>
@@ -72,36 +69,7 @@
           <p>Cargando datos...</p>
         </div>
         
-        <!-- Mostrar datos del usuario cuando estén disponibles -->
-        <div v-if="user && !loading">
-          <div class="welcome-section">
-            <h2>Bienvenido, {{ user.nombre }}!</h2>
-            <p class="welcome-text">Estamos encantados de tenerte aquí.  BLA BLA BLA BLA BLSA VBLAM ETC ETC</p>
-          </div>
-          
-          <div class="dashboard-cards">
-            <div class="dashboard-card">
-              <Icon icon="mdi:calendar-text" width="28" />
-              <h4>Eventos Disponibles</h4>
-              <p>Explora todos los eventos disponibles para participar.</p>
-              <router-link to="/eventosUser" class="card-link">
-                Ver eventos →
-              </router-link>
-            </div>
-            
-            <div class="dashboard-card">
-              <Icon icon="mdi:ticket-confirmation-outline" width="28" />
-              <h4>Mis Eventos</h4>
-              <p>Gestiona los eventos en los que estás participando.</p>
-
-              <router-link to="/misEventos" class="card-link">
-                Ver mis eventos →
-              </router-link>
-            </div>
-          </div>
-        </div>
         
-      
         
         <!-- Mostrar mensaje si no hay usuario -->
         <div v-if="!user && !loading" class="no-user-message">
@@ -120,21 +88,18 @@
 
 <script>
 export default {
-  name: 'NormalDashboard',
+  name: 'MisEventos',
   
   data() {
     return {
       user: null,
       loading: true,
       sidebarCollapsed: false,
-      activeMenu: 'home',
-      pageTitle: 'Inicio'
     }
   },
   
   mounted() {
     this.cargarDatos()
-
   },
   
   methods: {
@@ -162,7 +127,7 @@ export default {
       }, 300)
     },
     
-    salir() {
+    handleLogout() {
       console.log('Cerrando sesión...')
       localStorage.removeItem('user')
       this.user = null
@@ -177,6 +142,35 @@ export default {
       this.sidebarCollapsed = !this.sidebarCollapsed
     },
     
+    setActiveMenu(menu) {
+      this.activeMenu = menu
+      
+      // Actualizar título de página según el menú seleccionado
+      switch(menu) {
+        case 'home':
+          this.pageTitle = 'Inicio'
+          break
+        case 'eventos':
+          this.pageTitle = 'Eventos'
+          break
+        case 'mis-eventos':
+          this.pageTitle = 'Mis Eventos'
+          break
+        default:
+          this.pageTitle = 'Inicio'
+      }
+    },
+    
+    setActiveMenuFromRoute() {
+      const route = this.$route.path
+      if (route.includes('eventos') && !route.includes('mis-eventos')) {
+        this.setActiveMenu('eventos')
+      } else if (route.includes('mis-eventos')) {
+        this.setActiveMenu('mis-eventos')
+      } else {
+        this.setActiveMenu('home')
+      }
+    },
     
     getInitials(nombre, apellidos) {
       if (!nombre || !apellidos) return 'U'
@@ -223,12 +217,8 @@ export default {
   font-weight: 600;
 }
 
-
-
-
-
 .toggle-btn {
-  background-color: rgba(255, 255, 255, 0.103);
+  background: rgba(255, 255, 255, 0.1);
   border: none;
   color: white;
   width: 30px;
@@ -238,11 +228,11 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
+  transition: background 0.3s;
 }
 
 .toggle-btn:hover {
-  transform: scale(1.005);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .sidebar-menu {

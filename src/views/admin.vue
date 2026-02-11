@@ -1,8 +1,8 @@
 <template >
   <header>
-      <h2><RouterLink class="link" to="/admin">Home</RouterLink></H2>
-      <h2><RouterLink class="link" to="/eventosAdmin">Eventos</RouterLink></H2>
-    </header>
+    <h2><RouterLink class="link" to="/admin">Home</RouterLink></H2>
+    <h2><RouterLink class="link" to="/eventosAdmin">Eventos</RouterLink></H2>
+  </header>
   <div class="home-container"  v-if="user">
 
     <h2>Usuario {{ user.rol }}</h2>
@@ -24,7 +24,7 @@
     </div>
     
     <div class="content" v-if="user">
-      <button @click="handleLogout" class="logout-button">
+      <button @click="salir" class="logout-button">
         Cerrar Sesión
       </button>
     </div>
@@ -55,24 +55,11 @@ export default {
         const usuarioDatos = localStorage.getItem('user')
         console.log('Usuario en localStorage:', usuarioDatos)
         
-        if (!usuarioDatos) {
-          console.log('No hay usuario, redirigiendo a login...')
-          this.$router.push('/login')
-        } else {
-          try {
-            this.user = JSON.parse(usuarioDatos)
-            console.log('Usuario cargado:', this.user)
-          } catch (error) {
-            console.error('Error parseando usuario:', error)
-            this.$router.push('/login')
-          }
-        }
-        
         this.loading = false
       }, 100) // Pequeño delay para evitar parpadeo
     },
     
-    handleLogout() {
+    salir() {
       console.log('Cerrando sesión...')
       localStorage.removeItem('user')
       this.user = null
