@@ -37,6 +37,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
   //elimina reventos
   eliminarEvento:(codigoEliminar)=>{
     return ipcRenderer.invoke('api-eliminar-evento',codigoEliminar);
+  },
+
+
+
+  //modificar evento
+  modievento:(eventoActualizado)=>{
+    return ipcRenderer.invoke('api-modi-evento', {eventoActualizado});
+  },
+
+
+  crearreserva:(reserva_nueva)=>{
+    return ipcRenderer.invoke('api-reserva-nueva', {reserva_nueva});
   }
   
 });

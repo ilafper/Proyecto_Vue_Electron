@@ -104,24 +104,18 @@
 
                         <!-- Información adicional (oculta por defecto) -->
                         <div v-if="mostrarDetalles[cada_evento.code_Evento]" class="info-adicional">
-                            <p><span class="etiqueta">Inicio:</span> {{ cada_evento.fechaInicio }}</p>
-                            <p><span class="etiqueta">Fin:</span> {{ cada_evento.fechaFin }}</p>
+                            <p><span class="etiqueta">Fecha:</span> {{ cada_evento.fecha }}</p>
+                            <p><span class="etiqueta">Hora</span> {{ cada_evento.horaInicio }} de {{ cada_evento.horaFin }} </p>
                             <p class="descripcion-completa">{{ cada_evento.descripcionEvento }}</p>
+                        </div>
+                        <div>
+                            <button @click="apuntarme(cada_evento)">Apuntarme</button>
                         </div>
                     </div>
                 </div>
 
 
-                <!-- Mostrar mensaje si no hay usuario -->
-                <div v-if="!user && !loading" class="no-user-message">
-                    <div class="message-container">
-                        <h3>No se encontraron datos de usuario</h3>
-                        <p>Por favor, inicia sesión nuevamente.</p>
-                        <button @click="goToLogin" class="login-button">
-                            Ir a Inicio de Sesión
-                        </button>
-                    </div>
-                </div>
+                
             </div>
         </div>
     </div>
@@ -155,7 +149,7 @@ export default {
 
             setTimeout(() => {
                 const usuarioDatos = localStorage.getItem('user')
-                console.log('Usuario en localStorage:', usuarioDatos)
+                console.log('datos usuario suar:', usuarioDatos)
 
                 if (!usuarioDatos) {
                     console.log('No hay usuario, redirigiendo a login...')
@@ -216,6 +210,27 @@ export default {
                 this.loading = false
             }
         },
+
+        async apuntarme(cada_evento) {
+            console.log("sisis reserva");
+            console.log(cada_evento);
+            console.log(this.user.code_user);
+            
+            const reserva_nueva={
+                codigo_evento: cada_evento.code_Evento,
+                nombre_evento:cada_evento.nombreEvento,
+                fecha:cada_evento.fecha,
+                code_usuario:this.user.code_user,
+                horaInicio:cada_evento.horaInicio,
+                horaFin:cada_evento.horaFin,
+            }
+            console.log(reserva_nueva);
+            
+            const enviar_reserva = await window.electronAPI.crearreserva(reserva_nueva)
+            console.log("respues",enviar_reserva);
+            this.cargareventos();
+
+        }
     }
 }
 </script>
@@ -306,8 +321,6 @@ export default {
     color: #333;
     line-height: 1.6;
 }
-
-
 
 .lista_eventos {
     border: 3px solid #cc0000;

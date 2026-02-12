@@ -117,6 +117,7 @@
 </template>
 
 <script>
+
 export default {
   name: 'NormalDashboard',
   

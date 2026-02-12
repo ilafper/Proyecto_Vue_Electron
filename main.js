@@ -163,24 +163,52 @@ ipcMain.handle('api-eliminar-evento', async (event,codigoEliminar) => {
 });
 
 
+// modificar eventos
 
 
-ipcMain.handle('api-modi-evento', async (event,codigoEliminar) => {
+ipcMain.handle('api-modi-evento', async (event, eventoActualizado ) => {
   try {
-     const response = await fetch(`http://localhost:3000/api/modievento/${codigoEliminar}`, {
-      method: 'DELETE',
+     const response = await fetch(`http://localhost:3000/api/modievento`, {
+      method: 'put',
       headers: {
         'Content-Type': 'application/json',
-      }
+      },
+      body: JSON.stringify(eventoActualizado)
     });
     
     const data = await response.json();
     return data;
     
   } catch (error) {
-    console.error('Error AL ELIMINAR EVENTO:', error);
-    return { error: 'Error eliminado evento evento' };
+    console.error('Error ', error);
+    return { error};
   }
+});
+
+
+
+
+ipcMain.handle('api-reserva-nueva', async (event, reserva_nueva ) => {
+  console.log(reserva_nueva);
+  
+  try {
+     const response = await fetch(`http://localhost:3000/api/crearreserva`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(reserva_nueva)
+    });
+    
+    const data = await response.json();
+    return data;
+    
+  } catch (error) {
+    console.error('Error crear reserva ', error);
+    return { error};
+  }
+
+
 });
 
 
@@ -188,8 +216,9 @@ ipcMain.handle('api-modi-evento', async (event,codigoEliminar) => {
 
 
 
-// INICIAR LA APLICACIÓN
 
+
+// INICIAR LA APLICACIÓN
 
 app.whenReady().then(() => {
   createWindow();

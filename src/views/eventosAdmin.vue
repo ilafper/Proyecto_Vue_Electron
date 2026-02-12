@@ -71,10 +71,10 @@
           <p>Cargando datos...</p>
         </div>
         <div class="header-boton">
-            <button  @click="abrirModal" class="crear-evento">Crear evento</button>
+          <button @click="abrirCrear" class="crear-evento">Crear evento</button>
         </div>
-        
-        
+
+
         <div class="contenido-tabla">
 
           <div class="card table-container">
@@ -122,8 +122,7 @@
 
                     <td class="action-cell">
                       <div class="action-buttons">
-                        <button class="btn-icon btn-edit" title="Editar evento"
-                          @click="editarEvento(cada_evento.code_Evento)">
+                        <button class="btn-icon btn-edit" title="Editar evento" @click="abrirEditar(cada_evento)">
                           <Icon icon="mdi:pencil" width="18" />
                         </button>
                         <button class="btn-icon btn-delete" title="Eliminar evento"
@@ -142,72 +141,25 @@
         </div>
 
       </div>
+
+      <!--componente modal -->
+      <ModalEvento v-model:mostrar="mostrarModal" :modo="modoModal" :evento="eventoSeleccionado"
+        @guardar="guardarEvento" />
     </div>
-
-
-
-    <!-- Modal Crear eventos-->
-    <div v-if="modalVisible" class="modal-overlay" @click="cerrarModal">
-      <div class="modal-content" @click.stop>
-        <!-- Cabecera -->
-        <div class="modal-header">
-          <h3>Creacion eventos</h3>
-          <button class="close-btn" @click="cerrarModal">×</button>
-        </div>
-
-        <form @submit.prevent="crearevento" class="eventos-form">
-
-          <div class="input-group">
-            <label>Nombre Evento</label>
-            <input type="text" v-model="nombreEvento" placeholder="Firma de Autógrafos" required />
-          </div>
-
-          <div class="input-group">
-            <label>Descripcion</label>
-            <input type="textarea" v-model="descripcionEvento" placeholder="Encuentro con artistas locales..." />
-          </div>
-
-          <div class="input-group">
-            <label>Plazas Totales</label>
-            <input type="number" v-model="plazasTotales" required />
-          </div>
-          <div class="input-group">
-            <label>fecha</label>
-            <input type="date" v-model="fecha" required />
-          </div>
-
-          <div class="input-group">
-            <label>Hora inicio</label>
-            <input type="time" v-model="horaInicio" required />
-          </div>
-
-          <div class="input-group">
-            <label>Hora Fin</label>
-            <input type="time" v-model="horaFin" required />
-          </div>
-
-          <div v-if="error" class="error">
-            {{ error }}
-          </div>
-
-          <button type="submit" :disabled="loading" class="crearEvento">
-            {{ loading ? 'Cargando...' : 'Crear evento' }}
-          </button>
-        </form>
-      </div>
-    </div>
-
-
-
-
 
   </div>
 </template>
 
 <script>
+
+import ModalEvento from '../components/modal.vue'
+
 export default {
   name: 'EventosAdmin',
 
+  components: {
+    ModalEvento
+  },
   data() {
     return {
       user: null,
@@ -215,31 +167,40 @@ export default {
       sidebarCollapsed: false,
       currentPage: 1,
       eventos: [],
-      modalVisible: false,
+      // para controlar el modal 
+      mostrarModal: false,
+      modoModal: 'crear',
+      eventoSeleccionado: null
     }
   },
 
   mounted() {
     this.cargarDatos()
     this.cargareventos()
-    this.crearevento()
-    
+
   },
 
   methods: {
 
-    abrirModal() {
-      console.log("abriendo modal sisisi");
 
-      this.modalVisible = true
+    abrirCrear() {
+      console.log("abierto modal crear");
+
+      this.modoModal = 'crear'
+      this.eventoSeleccionado = null
+      this.mostrarModal = true
     },
 
-    cerrarModal() {
-      this.modalVisible = false
-      console.log("cerrando cerrando");
 
+    abrirEditar(evento) {
+      console.log('Evento a editar:', JSON.parse(JSON.stringify(evento)))
+
+      console.log("modal editar");
+
+      this.modoModal = 'editar'
+      this.eventoSeleccionado = evento
+      this.mostrarModal = true
     },
-
 
     salir() {
       console.log('Cerrando sesión...')
@@ -247,6 +208,7 @@ export default {
       this.user = null
       this.$router.push('/login')
     },
+
     cargarDatos() {
       console.log('Cargando datos del usuario...')
 
@@ -290,6 +252,8 @@ export default {
       if (!nombre || !apellidos) return 'U'
       return (nombre.charAt(0) + apellidos.charAt(0)).toUpperCase()
     },
+
+    //cargar eventos funcion
     async cargareventos() {
 
       try {
@@ -298,7 +262,7 @@ export default {
 
         if (response.success) {
           this.eventos = response.eventos.eventosFormateados
-          console.log(this.eventos);
+          console.log("asdasd", this.eventos);
         } else {
           this.error = response.message
         }
@@ -317,144 +281,71 @@ export default {
         ? text.substring(0, maxLength) + '...'
         : text
     },
-    async crearevento() {
 
-      console.log('Datos nuevo evento:', {
-        nombreEvento: this.nombreEvento,
-        descripcionEvento: this.descripcionEvento,
-        plazasTotales: this.plazasTotales,
-        fecha: this.fecha,
-        horaInicio: this.horaInicio,
-        horaFin:this.horaFin
-      })
-
-
+    async guardarEvento(datos) {
       try {
-        // Verificar Electron API
-        if (!window.electronAPI) {
-          throw new Error('Electron no está disponible')
+        if (this.modoModal === 'crear') {
+          // CREAR
+          const resultado = await window.electronAPI.crearEvento(
+            datos.nombreEvento,
+            datos.descripcionEvento,
+            datos.plazasTotales,
+            datos.fecha,
+            datos.horaInicio,
+            datos.horaFin
+          )
+          console.log('Evento creado:', resultado)
+        } else {
+          //parte editar
+          console.log(this.eventoSeleccionado);
+          
+          // 2. Crear objeto COMPLETO con todos los campos
+          const eventoActualizado = {
+            code_Evento: this.eventoSeleccionado.code_Evento,
+            nombreEvento: datos.nombreEvento,
+            descripcionEvento: datos.descripcionEvento,
+            plazasTotales: Number(datos.plazasTotales),
+            fecha: datos.fecha,
+            horaInicio: datos.horaInicio,
+            horaFin: datos.horaFin,
+            PlazasDisponibles: this.eventoSeleccionado.PlazasDisponibles,
+          }
+          
+          console.log('Enviando a API:', eventoActualizado)
+
+          // 3. Llamar a Electron
+          const resultado = await window.electronAPI.modievento(eventoActualizado)
+          console.log('Respuesta:', resultado)
         }
 
-        // Llamar a Electron
-        const resultado = await window.electronAPI.crearEvento(
-          this.nombreEvento,
-          this.descripcionEvento,
-          this.plazasTotales,
-          this.fecha,
-          this.horaInicio,
-          this.horaFin,
-        )
-
-        console.log('Resultado:', resultado)
-        this.cerrarModal()
-        this.cargareventos()
-
-      } catch (err) {
-        console.error('Error:', err)
-        this.error = 'Error de conexión con el servidor'
-      } finally {
-        this.loading = false
+        await this.cargareventos()
+      } catch (error) {
+        console.error('Error al guardar:', error)
       }
     },
 
 
 
-
+    // 
     async eliminEvento(codigoEliminar) {
       console.log("Codigo recibido:", codigoEliminar);
-      
+
       const preguntaEliminar = confirm('¿Estás seguro de eliminar este evento?');
-        if (preguntaEliminar) {
-          console.log("asdasd",codigoEliminar);
-          
-          const resultado = await window.electronAPI.eliminarEvento(codigoEliminar); 
-          console.log(resultado);
-        } else {
-          console.log("Eliminación cancelada");
-        }
+      if (preguntaEliminar) {
+        console.log("asdasd", codigoEliminar);
+
+        const resultado = await window.electronAPI.eliminarEvento(codigoEliminar);
+        console.log(resultado);
+        this.cargareventos();
+      } else {
+        console.log("Eliminación cancelada");
       }
     }
+  }
 }
 </script>
 
 <style scoped>
-
-/*parte modal */
-.crearEvento{
-  margin-top: 10px;
-  width: 100%;
-  border: none;
-  background-color: #1a2530d8;
-  color:white;
-  font-weight: bold;
-  padding: 10px;
-  
-}
-
-.close-btn {
-  border: none;
-  background: none;
-  position: relative;
-  left: 430px;
-  top: -40px;
-  font-size: 40px;
-  cursor: pointer;
-}
-
-.input-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.input-group label {
-  margin-bottom: 8px;
-  font-weight: 500;
-  color: #555;
-}
-
-.input-group input {
-  padding: 12px 15px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 16px;
-  transition: border-color 0.3s;
-}
-
-.input-group input:focus {
-  outline: none;
-  border-color: #007bff;
-}
-
-.input-group input:disabled {
-  background-color: #f8f9fa;
-  cursor: not-allowed;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  padding: 30px;
-  background: white;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-}
-
-
 /* Versión ultra simple */
 .table-responsive {
   overflow-x: auto;
@@ -500,18 +391,18 @@ export default {
   color: #000;
 }
 
-.header-boton{
+.header-boton {
   display: flex;
   justify-content: end;
 }
 
-.crear-evento{
-  background-color:#263545;
+.crear-evento {
+  background-color: #263545;
   color: white;
   font-weight: bold;
-  border:none;
+  border: none;
   padding: 10px;
-  border-radius:5px;
+  border-radius: 5px;
 }
 
 .contenido-tabla {
