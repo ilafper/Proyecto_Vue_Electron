@@ -71,7 +71,8 @@
           <p>Cargando datos...</p>
         </div>
         <div class="header-boton">
-          <button @click="abrirCrear" class="crear-evento">Crear evento</button>
+          <button @click="abrirCrear" class="crear-evento">Crear Evento</button>
+          <button @click="recargar" class="btn_recarga"><Icon  class="relado" icon="mdi:reload" width="25"/></button>
         </div>
 
 
@@ -281,6 +282,12 @@ export default {
         ? text.substring(0, maxLength) + '...'
         : text
     },
+    recargar(){
+      console.log("sisis recarga");
+      
+      this.cargareventos();
+    }
+    ,
 
     async guardarEvento(datos) {
       try {
@@ -346,7 +353,29 @@ export default {
 </script>
 
 <style scoped>
-/* Versión ultra simple */
+
+
+.relado{
+  cursor: pointer;
+  color: rgb(0, 0, 0);
+}
+
+.btn_recarga{
+  background: none;
+  border: none;
+  
+}
+
+
+
+.btn_recarga Icon{
+  background: none;
+  border: none;
+  color: grey;
+  
+}
+
+
 .table-responsive {
   overflow-x: auto;
 }
@@ -393,7 +422,7 @@ export default {
 
 .header-boton {
   display: flex;
-  justify-content: end;
+  justify-content: space-between;
 }
 
 .crear-evento {
