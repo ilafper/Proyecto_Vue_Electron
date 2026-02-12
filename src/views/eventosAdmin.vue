@@ -3,10 +3,9 @@
     <!-- Menú lateral -->
     <div class="sidebar" :class="{ 'collapsed': sidebarCollapsed }">
       <div class="sidebar-header">
-        <h3 v-if="!sidebarCollapsed">Menu Admin</h3>
+        <h3 v-if="!sidebarCollapsed">Eventos admin</h3>
         <button class="toggle-btn" @click="toggleSidebar">
-          <Icon :icon="sidebarCollapsed ? 'mdi:chevron-right' : 'mdi:chevron-left'" width="20" />
-        </button>
+          {{ sidebarCollapsed ? '>' : '<' }} </button>
       </div>
 
       <nav class="sidebar-menu">
@@ -56,7 +55,7 @@
     <div class="main-content">
       <header class="main-header">
         <div class="header-left">
-          <h1>Home</h1>
+          <h1>Gestion eventos</h1>
         </div>
         <div class="header-right">
           <button @click="salir" class="logout-button">
@@ -71,50 +70,137 @@
           <div class="spinner"></div>
           <p>Cargando datos...</p>
         </div>
+        <div class="header-boton">
+            <button  @click="abrirModal" class="crear-evento">Crear evento</button>
+        </div>
+        
+        
+        <div class="contenido-tabla">
 
-        <!-- Mostrar datos del usuario cuando estén disponibles -->
-        <div v-if="user && !loading">
-          <div class="welcome-section">
-            <h2>Bienvenido, {{ user.nombre }}!</h2>
-            <p class="welcome-text">Estamos encantados de tenerte aquí. BLA BLA BLA BLA BLSA VBLAM ETC ETC</p>
-          </div>
-
-          <div class="dashboard-cards">
-            <div class="dashboard-card">
-              <Icon icon="mdi:calendar-text" width="28" />
-              <h4>Administra los eventos</h4>
-              <p>Explora todos los eventos disponibles para participar.</p>
-              <router-link to="/eventosAdmin" class="card-link">
-                Ver eventos →
-              </router-link>
+          <div class="card table-container">
+            <div class="loading-state" v-if="loading">
+              <div class="spinner"></div>
+              <p>Cargando eventos...</p>
             </div>
 
-            <div class="dashboard-card">
-              <Icon icon="mdi:user" width="28" />
-              <h4> Gestiona los usuarios </h4>
-              <p>Gestiona los eventos en los que estás participando.</p>
+            <div v-else class="table-responsive">
+              <table class="events-table">
+                <thead>
 
-              <router-link to="/usersAdmin" class="card-link">
-                Ver los usuarios →
-              </router-link>
+                  <tr>
+                    <th class="text-left">Nombre</th>
+                    <th class="text-left">Descripción</th>
+                    <th class="text-center">Plazas Total</th>
+                    <th class="text-center">Disponibles</th>
+                    <th class="text-center">Fecha</th>
+                    <th class="text-center">Hora</th>
+                    <th class="text-center">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="cada_evento in eventos">
+                    <td class="event-name">
+                      <strong>{{ cada_evento.nombreEvento }}</strong>
+                    </td>
+                    <td class="event-description">
+                      {{ ajusteTexto(cada_evento.descripcionEvento, 40) }}
+                    </td>
+                    <td class="text-center">
+                      <span class="badge">{{ cada_evento.plazasTotales }}</span>
+                    </td>
+                    <td class="text-center">
+                      <span :class="['badge', cada_evento.PlazasDisponibles]">
+                        {{ cada_evento.PlazasDisponibles }}
+                      </span>
+                    </td>
+                    <td class="text-center date-cell">
+                      {{ cada_evento.fecha }}
+                    </td>
+                    <td class="text-center date-cell">
+                      {{ cada_evento.horaInicio }} - {{ cada_evento.horaFin }}
+                    </td>
+
+                    <td class="action-cell">
+                      <div class="action-buttons">
+                        <button class="btn-icon btn-edit" title="Editar evento"
+                          @click="editarEvento(cada_evento.code_Evento)">
+                          <Icon icon="mdi:pencil" width="18" />
+                        </button>
+                        <button class="btn-icon btn-delete" title="Eliminar evento"
+                          @click="eliminEvento(cada_evento.code_Evento)">
+                          <Icon icon="mdi:trash-can-outline" width="18" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
+
+
         </div>
 
-
-
-        <!-- Mostrar mensaje si no hay usuario -->
-        <div v-if="!user && !loading" class="no-user-message">
-          <div class="message-container">
-            <h3>No se encontraron datos de usuario</h3>
-            <p>Por favor, inicia sesión nuevamente.</p>
-            <button @click="goToLogin" class="login-button">
-              Ir a Inicio de Sesión
-            </button>
-          </div>
-        </div>
       </div>
     </div>
+
+
+
+    <!-- Modal Crear eventos-->
+    <div v-if="modalVisible" class="modal-overlay" @click="cerrarModal">
+      <div class="modal-content" @click.stop>
+        <!-- Cabecera -->
+        <div class="modal-header">
+          <h3>Creacion eventos</h3>
+          <button class="close-btn" @click="cerrarModal">×</button>
+        </div>
+
+        <form @submit.prevent="crearevento" class="eventos-form">
+
+          <div class="input-group">
+            <label>Nombre Evento</label>
+            <input type="text" v-model="nombreEvento" placeholder="Firma de Autógrafos" required />
+          </div>
+
+          <div class="input-group">
+            <label>Descripcion</label>
+            <input type="textarea" v-model="descripcionEvento" placeholder="Encuentro con artistas locales..." />
+          </div>
+
+          <div class="input-group">
+            <label>Plazas Totales</label>
+            <input type="number" v-model="plazasTotales" required />
+          </div>
+          <div class="input-group">
+            <label>fecha</label>
+            <input type="date" v-model="fecha" required />
+          </div>
+
+          <div class="input-group">
+            <label>Hora inicio</label>
+            <input type="time" v-model="horaInicio" required />
+          </div>
+
+          <div class="input-group">
+            <label>Hora Fin</label>
+            <input type="time" v-model="horaFin" required />
+          </div>
+
+          <div v-if="error" class="error">
+            {{ error }}
+          </div>
+
+          <button type="submit" :disabled="loading" class="crearEvento">
+            {{ loading ? 'Cargando...' : 'Crear evento' }}
+          </button>
+        </form>
+      </div>
+    </div>
+
+
+
+
+
   </div>
 </template>
 
@@ -127,6 +213,7 @@ export default {
       user: null,
       loading: true,
       sidebarCollapsed: false,
+      currentPage: 1,
       eventos: [],
       modalVisible: false,
     }
@@ -134,14 +221,13 @@ export default {
 
   mounted() {
     this.cargarDatos()
-
     this.cargareventos()
-
     this.crearevento()
-
+    
   },
 
   methods: {
+
     abrirModal() {
       console.log("abriendo modal sisisi");
 
@@ -153,60 +239,57 @@ export default {
       console.log("cerrando cerrando");
 
     },
-    async crearevento() {
-
-      console.log('Datos nuevo evento:', {
-        nombreEvento: this.nombreEvento,
-        descripcionEvento: this.descripcionEvento,
-        plazasTotales: this.plazasTotales,
-        fecha: this.fecha,
-        horaInicio: this.horaInicio,
-        horaFin: this.horaFin
-      })
 
 
-      try {
-        // Verificar Electron API
-        if (!window.electronAPI) {
-          throw new Error('Electron no está disponible')
-        }
-
-        // Llamar a Electron
-        const resultado = await window.electronAPI.crearEvento(
-          this.nombreEvento,
-          this.descripcionEvento,
-          this.plazasTotales,
-          this.fecha,
-          this.horaInicio,
-          this.horaFin,
-        )
-
-        console.log('Resultado:', resultado)
-
-
-      } catch (err) {
-        console.error('Error:', err)
-        this.error = 'Error de conexión con el servidor'
-      } finally {
-        this.loading = false
-      }
+    salir() {
+      console.log('Cerrando sesión...')
+      localStorage.removeItem('user')
+      this.user = null
+      this.$router.push('/login')
     },
     cargarDatos() {
+      console.log('Cargando datos del usuario...')
+
       setTimeout(() => {
         const usuarioDatos = localStorage.getItem('user')
+        console.log('Usuario en localStorage:', usuarioDatos)
+
         if (!usuarioDatos) {
+          console.log('No hay usuario, redirigiendo a login...')
           this.$router.push('/login')
         } else {
           try {
             this.user = JSON.parse(usuarioDatos)
+            console.log('Usuario cargado:', this.user)
           } catch (error) {
             console.error('Error parseando usuario:', error)
             this.$router.push('/login')
           }
         }
-      }, 100)
+
+        this.loading = false
+      }, 300)
     },
 
+    salir() {
+      console.log('Cerrando sesión...')
+      localStorage.removeItem('user')
+      this.user = null
+      this.$router.push('/login')
+    },
+
+    goToLogin() {
+      this.$router.push('/login')
+    },
+
+    toggleSidebar() {
+      this.sidebarCollapsed = !this.sidebarCollapsed
+    },
+
+    getInitials(nombre, apellidos) {
+      if (!nombre || !apellidos) return 'U'
+      return (nombre.charAt(0) + apellidos.charAt(0)).toUpperCase()
+    },
     async cargareventos() {
 
       try {
@@ -227,53 +310,215 @@ export default {
       }
     },
 
-    editarEvento(codigo) {
-      console.log('Editar evento:', codigo)
 
-    },
-
-    eliminarEvento(codigo) {
-      if (confirm('¿Estás seguro de eliminar este evento?')) {
-        console.log('Eliminar evento:', codigo)
-      }
-    },
-
-    truncateText(text, maxLength) {
+    ajusteTexto(text, maxLength) {
       if (!text) return ''
       return text.length > maxLength
         ? text.substring(0, maxLength) + '...'
         : text
     },
+    async crearevento() {
+
+      console.log('Datos nuevo evento:', {
+        nombreEvento: this.nombreEvento,
+        descripcionEvento: this.descripcionEvento,
+        plazasTotales: this.plazasTotales,
+        fecha: this.fecha,
+        horaInicio: this.horaInicio,
+        horaFin:this.horaFin
+      })
 
 
+      try {
+        // Verificar Electron API
+        if (!window.electronAPI) {
+          throw new Error('Electron no está disponible')
+        }
 
+        // Llamar a Electron
+        const resultado = await window.electronAPI.crearEvento(
+          this.nombreEvento,
+          this.descripcionEvento,
+          this.plazasTotales,
+          this.fecha,
+          this.horaInicio,
+          this.horaFin,
+        )
 
+        console.log('Resultado:', resultado)
+        this.cerrarModal()
+        this.cargareventos()
 
-    salir() {
-      console.log('Cerrando sesión...')
-      localStorage.removeItem('user')
-      this.user = null
-      this.$router.push('/login')
+      } catch (err) {
+        console.error('Error:', err)
+        this.error = 'Error de conexión con el servidor'
+      } finally {
+        this.loading = false
+      }
     },
 
-    goToLogin() {
-      this.$router.push('/login')
-    },
-
-    toggleSidebar() {
-      this.sidebarCollapsed = !this.sidebarCollapsed
-    },
 
 
-    getInitials(nombre, apellidos) {
-      if (!nombre || !apellidos) return 'U'
-      return (nombre.charAt(0) + apellidos.charAt(0)).toUpperCase()
+
+    async eliminEvento(codigoEliminar) {
+      console.log("Codigo recibido:", codigoEliminar);
+      
+      const preguntaEliminar = confirm('¿Estás seguro de eliminar este evento?');
+        if (preguntaEliminar) {
+          console.log("asdasd",codigoEliminar);
+          
+          const resultado = await window.electronAPI.eliminarEvento(codigoEliminar); 
+          console.log(resultado);
+        } else {
+          console.log("Eliminación cancelada");
+        }
+      }
     }
-  }
 }
 </script>
 
 <style scoped>
+
+/*parte modal */
+.crearEvento{
+  margin-top: 10px;
+  width: 100%;
+  border: none;
+  background-color: #1a2530d8;
+  color:white;
+  font-weight: bold;
+  padding: 10px;
+  
+}
+
+.close-btn {
+  border: none;
+  background: none;
+  position: relative;
+  left: 430px;
+  top: -40px;
+  font-size: 40px;
+  cursor: pointer;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #555;
+}
+
+.input-group input {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.input-group input:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  padding: 30px;
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+
+/* Versión ultra simple */
+.table-responsive {
+  overflow-x: auto;
+}
+
+.events-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.events-table th {
+  background-color: #f5f5f5;
+  padding: 10px;
+  text-align: left;
+  border-bottom: 2px solid #ddd;
+}
+
+.events-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.badge {
+  background: #f0f0f0;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  padding: 5px;
+  cursor: pointer;
+  color: #666;
+}
+
+.btn-icon:hover {
+  color: #000;
+}
+
+.header-boton{
+  display: flex;
+  justify-content: end;
+}
+
+.crear-evento{
+  background-color:#263545;
+  color: white;
+  font-weight: bold;
+  border:none;
+  padding: 10px;
+  border-radius:5px;
+}
+
+.contenido-tabla {
+  border: 1px solid black;
+  margin-top: 20px;
+}
+
 .dashboard-container {
   display: flex;
   min-height: 100vh;
@@ -310,12 +555,8 @@ export default {
   font-weight: 600;
 }
 
-
-
-
-
 .toggle-btn {
-  background-color: rgba(255, 255, 255, 0.103);
+  background: rgba(255, 255, 255, 0.1);
   border: none;
   color: white;
   width: 30px;
@@ -325,11 +566,11 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
+  transition: background 0.3s;
 }
 
 .toggle-btn:hover {
-  transform: scale(1.005);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .sidebar-menu {
@@ -460,6 +701,7 @@ export default {
 }
 
 .content-wrapper {
+  border: 1px solid red;
   flex: 1;
   padding: 30px;
   overflow-y: auto;

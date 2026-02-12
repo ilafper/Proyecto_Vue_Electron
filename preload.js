@@ -31,5 +31,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   crearEvento: (nombreEvento,descripcionEvento,plazasTotales, fecha, horaInicio, horaFin) => {
     return ipcRenderer.invoke('api-crear-evento', { nombreEvento,descripcionEvento,plazasTotales,fecha, horaInicio,horaFin});
   },
+
+
+
+  //elimina reventos
+  eliminarEvento:(codigoEliminar)=>{
+    return ipcRenderer.invoke('api-eliminar-evento',codigoEliminar);
+  }
   
 });

@@ -181,6 +181,7 @@ export default {
 </script>
 
 <style scoped>
+
 .dashboard-container {
   display: flex;
   min-height: 100vh;

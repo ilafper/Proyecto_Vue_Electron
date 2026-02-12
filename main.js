@@ -67,6 +67,7 @@ ipcMain.handle('api-login', async (event, { email, password }) => {
   }
 });
 
+
 // HANDLER PARA OBTENER USUARIOS
 ipcMain.handle('api-get-usuarios', async () => {
   try {
@@ -91,6 +92,8 @@ ipcMain.handle('api-get-eventos', async () => {
     return { success: false, message: 'Error obteniendo eventos' };
   }
 });
+
+
 
 
 
@@ -138,9 +141,47 @@ ipcMain.handle('api-crear-evento', async (event, eventoDatos) => {
 });
 
 
+// eliminar eventos
+
+
+ipcMain.handle('api-eliminar-evento', async (event,codigoEliminar) => {
+  try {
+     const response = await fetch(`http://localhost:3000/api/eliminarEvento/${codigoEliminar}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    
+    const data = await response.json();
+    return data;
+    
+  } catch (error) {
+    console.error('Error AL ELIMINAR EVENTO:', error);
+    return { error: 'Error eliminado evento evento' };
+  }
+});
 
 
 
+
+ipcMain.handle('api-modi-evento', async (event,codigoEliminar) => {
+  try {
+     const response = await fetch(`http://localhost:3000/api/modievento/${codigoEliminar}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    
+    const data = await response.json();
+    return data;
+    
+  } catch (error) {
+    console.error('Error AL ELIMINAR EVENTO:', error);
+    return { error: 'Error eliminado evento evento' };
+  }
+});
 
 
 

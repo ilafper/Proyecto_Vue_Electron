@@ -284,6 +284,8 @@ export default {
       }, 100)
     },
 
+
+
     async cargareventos() {
 
       try {
@@ -326,6 +328,7 @@ export default {
 </script>
 
 <style scoped>
+
 .crearEvento {
   cursor: pointer;
   margin-top: 10px;
