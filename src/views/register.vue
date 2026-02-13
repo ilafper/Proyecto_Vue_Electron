@@ -1,10 +1,9 @@
 <template>
   <div class="register-container">
     <div class="register-card">
-      <h2 class="register-title">Registrarse</h2>
+      <h2 class="register-title">REGISTRATE</h2>
 
       <form @submit.prevent="comprobarRegistro" class="register-form">
-        <h2>Crear Cuenta</h2>
 
         <div class="input-group">
 
@@ -75,6 +74,7 @@
             Registrarse
         </button>
       </form>
+      <h3>¿Ya tienes cuenta? <RouterLink to="/">Inicia sesion</RouterLink></h3>
     </div>
   </div>
 </template>

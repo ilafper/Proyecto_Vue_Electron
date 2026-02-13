@@ -131,6 +131,7 @@ export default {
             loading: true,
             sidebarCollapsed: false,
             mostrarDetalles: {},
+            //donde estan todos los eventos 
             eventos: [],
         }
     },
