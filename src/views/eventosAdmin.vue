@@ -262,7 +262,7 @@ export default {
         //console.log("eventos evento sisis", response);
 
         if (response.success) {
-          this.eventos = response.eventos.eventosFormateados
+          this.eventos = response.eventos.todos_eventos
           console.log("asdasd", this.eventos);
         } else {
           this.error = response.message

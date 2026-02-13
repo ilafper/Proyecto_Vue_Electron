@@ -130,7 +130,8 @@ export default {
             user: null,
             loading: true,
             sidebarCollapsed: false,
-            mostrarDetalles: {}
+            mostrarDetalles: {},
+            eventos: [],
         }
     },
 
@@ -197,8 +198,8 @@ export default {
                 //console.log("eventos evento sisis", response);
 
                 if (response.success) {
-                    this.eventos = response.eventos.eventosFormateados
-                    console.log(this.eventos);
+                    this.eventos = response.eventos.todos_eventos
+                    console.log(response);
 
                 } else {
                     this.error = response.message
